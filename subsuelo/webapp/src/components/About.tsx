@@ -1,16 +1,27 @@
-const SOURCES: [string, string][] = [
-  ["Geology (lithology + faults)",
-    "IGME 1:1M (Spain, ArcGIS REST) and EGDI 1:1M (Europe, WFS) — granite/granitoid and felsic-volcanic host units, plus fault traces (EGDI HIKE)."],
-  ["Mineral occurrences",
-    "IGME BDMIN (Spain) and the EGDI INSPIRE mineral-occurrence inventory (Europe) — the known showings each model is trained on."],
-  ["Land parcels (cadastres)",
-    "Spanish Catastro (INSPIRE), French IGN Géoplateforme, Czech ČÚZK, and German GeoSN ALKIS (Saxony) — real parcel boundaries."],
-  ["Mining rights (permitting friction)",
-    "MITECO Catastro Minero (national) and IDECyL (Castilla y León) — granted/pending legal concessions."],
-  ["Land prices",
-    "France DVF (real recorded transactions, per-commune median); Eurostat apri_lprc (arable-land €/ha by NUTS region) and Destatis Kaufwerte (Germany) as estimated priors."],
-  ["Reference geometry",
-    "Natural Earth (coastline/country masks) and Eurostat GISCO (NUTS boundaries)."],
+type Link = [string, string];
+const SOURCES: { title: string; body: string; links: Link[] }[] = [
+  { title: "Geology (lithology + faults)",
+    body: "IGME 1:1M (Spain, ArcGIS REST) and EGDI 1:1M (Europe, WFS) — granite/granitoid and felsic-volcanic host units, plus fault traces (EGDI HIKE).",
+    links: [["IGME", "https://www.igme.es"], ["EGDI", "https://www.europe-geology.eu"]] },
+  { title: "Mineral occurrences",
+    body: "IGME BDMIN (Spain) and the EGDI INSPIRE mineral-occurrence inventory (Europe) — the known showings each model is trained on.",
+    links: [["IGME BDMIN", "https://www.igme.es"], ["EGDI", "https://www.europe-geology.eu/mineral-resources"]] },
+  { title: "Land parcels (cadastres)",
+    body: "Spanish Catastro (INSPIRE), French IGN Géoplateforme, Czech ČÚZK, and German GeoSN ALKIS (Saxony) — real parcel boundaries.",
+    links: [["Catastro ES", "https://www.catastro.hacienda.gob.es"], ["IGN FR", "https://geoservices.ign.fr"],
+            ["ČÚZK CZ", "https://www.cuzk.cz"], ["GeoSN DE", "https://www.geodaten.sachsen.de"]] },
+  { title: "Mining rights (permitting friction)",
+    body: "MITECO Catastro Minero (national) and IDECyL (Castilla y León) — granted/pending legal concessions.",
+    links: [["MITECO", "https://www.miteco.gob.es"], ["IDECyL", "https://idecyl.jcyl.es"]] },
+  { title: "Land prices",
+    body: "France DVF (real recorded transactions, per-commune median); Eurostat apri_lprc (arable-land €/ha by NUTS region) and Destatis Kaufwerte (Germany) as estimated priors.",
+    links: [["DVF FR", "https://app.dvf.etalab.gouv.fr"],
+            ["Eurostat apri_lprc", "https://ec.europa.eu/eurostat/databrowser/view/apri_lprc/default/table"],
+            ["Destatis", "https://www.destatis.de"]] },
+  { title: "Reference geometry",
+    body: "Natural Earth (coastline/country masks) and Eurostat GISCO (NUTS boundaries).",
+    links: [["Natural Earth", "https://www.naturalearthdata.com"],
+            ["GISCO NUTS", "https://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/administrative-units-statistical-units/nuts"]] },
 ];
 
 export default function About({ onClose }: { onClose: () => void }) {
@@ -25,8 +36,17 @@ export default function About({ onClose }: { onClose: () => void }) {
 
         <h3>Where the data comes from</h3>
         <dl className="src-list">
-          {SOURCES.map(([k, v]) => (
-            <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+          {SOURCES.map(({ title, body, links }) => (
+            <div key={title}>
+              <dt>{title}</dt>
+              <dd>{body}{" "}
+                <span className="src-links">
+                  {links.map(([label, url]) => (
+                    <a key={url} href={url} target="_blank" rel="noopener noreferrer">{label} ↗</a>
+                  ))}
+                </span>
+              </dd>
+            </div>
           ))}
         </dl>
 

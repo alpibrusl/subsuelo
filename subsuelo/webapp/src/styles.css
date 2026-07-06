@@ -131,3 +131,6 @@ ul.rows { list-style: none; margin: 0; padding: 0; }
 .src-list dd { margin: 2px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
 .modal.about .formula { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; color: var(--accent); text-align: center; }
 .modal.about a { color: var(--accent); }
+.src-links { display: inline-flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 3px; }
+.src-links a { color: var(--accent); text-decoration: none; font-size: 11.5px; white-space: nowrap; }
+.src-links a:hover { text-decoration: underline; }
