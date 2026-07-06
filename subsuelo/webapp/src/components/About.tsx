@@ -29,10 +29,11 @@ export default function About({ onClose }: { onClose: () => void }) {
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal about">
         <h2>About Subsuelo</h2>
-        <p>Subsuelo screens where to look for — and buy land for — critical-raw-material
-          metals, by fusing open geoscience, property cadastres, permitting data and land
-          prices into one map. Everything below is <b>real, open, public data</b>; the tool
-          computes screening indications, not exploration-grade or legal conclusions.</p>
+        <p>Subsuelo screens Europe for critical-raw-material investment opportunities —
+          identifying prospective ground and matching it to acquisition targets — by fusing
+          open geoscience, property cadastres, permitting data and land prices into one map.
+          Everything below is <b>real, open, public data</b>; the tool computes screening
+          indications, not exploration-grade or legal conclusions.</p>
 
         <h3>Where the data comes from</h3>
         <dl className="src-list">
