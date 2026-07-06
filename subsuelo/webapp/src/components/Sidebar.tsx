@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { Feature } from "geojson";
 import { cinfo, pct } from "../data.ts";
 import type {
@@ -19,7 +18,6 @@ interface SidebarProps {
   drill: Drill | null;
   toggles: Toggles;
   toggle: (name: keyof Toggles, val?: boolean) => void;
-  openHelp: () => void;
   selectParcel: (p: ParcelProps) => void;
   selectedParcel: ParcelProps | null;
   clearParcel: () => void;
@@ -41,14 +39,8 @@ function subtitleFor(meta: Meta | null | undefined, hasParcels: boolean): string
 
 export default function Sidebar(props: SidebarProps) {
   const { regions, region, setRegion, data, target, setTarget, activeHotspot, selectHotspot,
-          drill, toggles, toggle, openHelp, selectParcel, selectedParcel, clearParcel,
+          drill, toggles, toggle, selectParcel, selectedParcel, clearParcel,
           mode, setMode, pool, poolLoading, onPickParcel } = props;
-  const [copied, setCopied] = useState(false);
-  const copyLink = () => {
-    navigator.clipboard?.writeText(location.href).then(() => {
-      setCopied(true); setTimeout(() => setCopied(false), 1500);
-    });
-  };
   const meta = data?.meta;
   const hasParcels = (meta?.n_parcels ?? 0) > 0;
   const hotspots = meta?.hotspots || [];
@@ -74,10 +66,6 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <aside id="sidebar">
       <header>
-        <h1>Subsuelo
-          <button id="help-btn" title="What is this?" onClick={openHelp}>?</button>
-          <button id="share-btn" title="Copy a link to this view" onClick={copyLink}>{copied ? "✓ copied" : "share"}</button>
-        </h1>
         <div className="sub">{subtitleFor(meta, hasParcels)}</div>
         {regions.length > 1 && (
           <label className="region-pick">Area

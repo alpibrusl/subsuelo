@@ -4,6 +4,8 @@ import type { Drill, IndexParcel, ParcelProps, RegionData, RegionInfo, Target, T
 import Sidebar from "./components/Sidebar.tsx";
 import MapView from "./components/MapView.tsx";
 import Intro from "./components/Intro.tsx";
+import NavBar from "./components/NavBar.tsx";
+import About from "./components/About.tsx";
 
 const DEFAULT_TOGGLES: Toggles = {
   raster: true, occ: true, hotspots: true, workings: true, conc: true, hparcels: false, listed: false,
@@ -28,6 +30,7 @@ export default function App() {
   const [introOpen, setIntroOpen] = useState<boolean>(() => {
     try { return !localStorage.getItem("subsuelo_seen"); } catch { return true; }
   });
+  const [aboutOpen, setAboutOpen] = useState<boolean>(false);
   // metal + hotspot from the shared URL, applied once after the region loads
   const initialParams = useRef({
     metal: (() => {
@@ -141,13 +144,14 @@ export default function App() {
   return (
     <>
       {introOpen && <Intro onClose={closeIntro} />}
+      {aboutOpen && <About onClose={() => setAboutOpen(false)} />}
+      <NavBar onAbout={() => setAboutOpen(true)} onGuide={() => setIntroOpen(true)} />
       <div id="app">
         <Sidebar
           regions={regions} region={region} setRegion={setRegion}
           data={data} target={target} setTarget={setTarget}
           activeHotspot={activeHotspot} selectHotspot={selectHotspot}
           drill={drill} toggles={toggles} toggle={toggle}
-          openHelp={() => setIntroOpen(true)}
           selectParcel={selectParcel}
           selectedParcel={selectedParcel}
           clearParcel={() => setSelectedParcel(null)}

@@ -5,7 +5,17 @@
 }
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
-#app { display: grid; grid-template-columns: 380px 1fr; height: 100vh; }
+#root { display: flex; flex-direction: column; }
+#navbar { flex: none; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; background: var(--panel); border-bottom: 1px solid var(--line); }
+.nb-brand { display: flex; align-items: baseline; gap: 10px; }
+.nb-mark { align-self: center; width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, var(--accent), var(--gold)); }
+.nb-name { font-size: 16px; font-weight: 700; letter-spacing: .2px; }
+.nb-tag { font-size: 12px; color: var(--muted); }
+.nb-links { display: flex; align-items: center; gap: 6px; }
+.nb-links button, .nb-links .nb-gh { background: transparent; color: var(--muted); border: 1px solid transparent; border-radius: 7px; padding: 7px 11px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
+.nb-links button:hover, .nb-links .nb-gh:hover { color: var(--ink); border-color: var(--line); }
+#app { flex: 1; min-height: 0; display: grid; grid-template-columns: 380px 1fr; }
+@media (max-width: 640px) { .nb-tag { display: none; } }
 #sidebar { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; }
 header { padding: 18px 20px 14px; border-bottom: 1px solid var(--line); }
 header h1 { margin: 0; font-size: 17px; }
@@ -62,7 +72,7 @@ ul.rows { list-style: none; margin: 0; padding: 0; }
 .pd-score small { font-size: 11px; font-weight: 400; color: var(--muted); }
 .pd-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-top: 1px solid var(--line); }
 .pd-row span:first-child { color: var(--muted); }
-#map { height: 100vh; position: relative; }
+#map { height: 100%; position: relative; }
 .leaflet-container { background: #0f1419; height: 100%; }
 .map-legend { position: absolute; right: 12px; bottom: 22px; z-index: 500; background: rgba(20,27,36,.94); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; max-width: 250px; box-shadow: 0 6px 20px rgba(0,0,0,.4); font-size: 12px; }
 .map-legend .ml-head { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; }
@@ -109,3 +119,15 @@ ul.rows { list-style: none; margin: 0; padding: 0; }
 .buy-row .meta b { color: var(--ink); font-weight: 600; }
 .buy-row .fit .dot { display: block; width: 12px; height: 12px; border-radius: 50%; }
 .buy-list .more { text-align: center; font-size: 11px; color: var(--muted); padding: 8px 0 2px; }
+
+/* --- About modal --- */
+.modal.about { max-width: 640px; max-height: 82vh; overflow-y: auto; }
+.modal.about h3 { font-size: 14px; margin: 20px 0 8px; color: var(--ink); border-top: 1px solid var(--line); padding-top: 16px; }
+.modal.about p { color: #c7d1da; }
+.modal.about i { color: var(--muted); font-style: normal; }
+.src-list { margin: 0; }
+.src-list > div { margin: 9px 0; }
+.src-list dt { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+.src-list dd { margin: 2px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.modal.about .formula { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; color: var(--accent); text-align: center; }
+.modal.about a { color: var(--accent); }
