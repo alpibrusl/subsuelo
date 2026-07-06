@@ -1,0 +1,24 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Node / build
+node_modules/
+subsuelo/webapp/dist/
+
+# Generated pipeline output + raw-download cache (rebuilt by `python build.py`;
+# the deployed site ships from the gh-pages branch or the Actions artifact)
+out/
+
+# Cached Natural Earth / NUTS reference data (re-downloaded on demand)
+subsuelo/subsuelo/ingest/_ne_land_50m.geojson
+subsuelo/subsuelo/ingest/_ne_countries_50m.geojson
+subsuelo/subsuelo/ingest/_nuts2_20m.geojson
+
+# Stray local artifacts
+*.zip
+demo_map.png
+top_parcels.csv
+.DS_Store

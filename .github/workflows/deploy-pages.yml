@@ -1,0 +1,66 @@
+name: Deploy to GitHub Pages
+
+# Builds the region data + static bundle and deploys it to GitHub Pages as an
+# artifact — so the ~150 MB of regenerating data is NEVER committed to git
+# history (it's built fresh in CI each run). Runs on push to main and weekly.
+#
+# Setup once: repo Settings → Pages → Source = "GitHub Actions".
+
+# Manual-only by default so it doesn't run while Pages serves from the gh-pages
+# branch. To make CI the deployer instead (auto-refresh, no git bloat): set
+# Settings → Pages → Source = "GitHub Actions", then uncomment the push/schedule
+# triggers below.
+on:
+  workflow_dispatch: {}      # manual "Run workflow" button
+  # push:
+  #   branches: [main]
+  # schedule:
+  #   - cron: "0 4 * * 1"     # Mondays 04:00 UTC — weekly data refresh
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: subsuelo
+    steps:
+      - uses: actions/checkout@v4
+
+      # GDAL system libs for geopandas/rasterio/pyogrio
+      - run: sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: subsuelo/webapp/package-lock.json
+
+      # refetch every source + rebuild the region data (reproducible; see CLAUDE.md).
+      # drop SUBSUELO_REFRESH to reuse a committed out/cache instead of fetching live.
+      - run: SUBSUELO_REFRESH=1 python build.py
+
+      - run: npm ci
+        working-directory: subsuelo/webapp
+      - run: ./deploy/build-static.sh
+        working-directory: subsuelo/webapp
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: subsuelo/webapp/dist
+
+      - uses: actions/deploy-pages@v4

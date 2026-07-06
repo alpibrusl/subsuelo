@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Subsuelo · Prospectivity & Land Screening</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --bg: #0f1419; --panel: #1a222c; --panel2: #222d3a;
+      --ink: #e6edf3; --muted: #8b98a5; --line: #2d3b4a;
+      --accent: #4fd1c5; --gold: #f6c454;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+    #app { display: grid; grid-template-columns: 380px 1fr; height: 100vh; }
+    #sidebar { background: var(--panel); border-right: 1px solid #2d3b4a; overflow-y: auto; display: flex; flex-direction: column; }
+    header { padding: 18px 20px 14px; border-bottom: 1px solid #2d3b4a; }
+    header h1 { margin: 0; font-size: 17px; letter-spacing: .2px; }
+    header .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .stats { display: flex; gap: 10px; padding: 14px 20px; border-bottom: 1px solid #2d3b4a; }
+    .stat { flex: 1; background: var(--panel2); border-radius: 8px; padding: 10px 12px; }
+    .stat .n { font-size: 20px; font-weight: 600; }
+    .stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .controls { padding: 12px 20px; border-bottom: 1px solid #2d3b4a; display: flex; flex-direction: column; gap: 10px; }
+    .controls label { font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--muted); }
+    .controls input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
+    .list-head { padding: 12px 20px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); }
+    #list { list-style: none; margin: 0; padding: 0 12px 20px; }
+    .row { background: var(--panel2); border: 1px solid transparent; border-radius: 8px; padding: 10px 12px; margin: 6px 0; cursor: pointer; transition: border-color .12s, transform .06s; }
+    .row:hover { border-color: var(--accent); }
+    .row.active { border-color: var(--gold); }
+    .row .top { display: flex; justify-content: space-between; align-items: baseline; }
+    .row .pid { font-weight: 600; font-size: 13px; }
+    .row .score { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); }
+    .row .meta { color: var(--muted); font-size: 11px; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .badge { background: var(--gold); color: #1a222c; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
+    .src { color: var(--muted); font-size: 10px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+    .targets { padding: 12px 20px; border-bottom: 1px solid #2d3b4a; }
+    .t-label { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 7px; }
+    .t-btns { display: flex; gap: 6px; }
+    .t-btns button { flex: 1; background: var(--panel2); color: var(--ink); border: 1px solid transparent; border-radius: 7px; padding: 7px 0; font-size: 13px; font-weight: 600; cursor: pointer; transition: border-color .12s; }
+    .t-btns button:hover { border-color: var(--muted); }
+    .t-btns button.on { border-color: var(--accent); color: var(--accent); }
+    .t-btns button .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+    #t-note { margin-top: 7px; min-height: 12px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 20px 10px; }
+    .chip { display: flex; align-items: center; gap: 6px; background: var(--panel2); border-radius: 20px; padding: 4px 11px 4px 8px; font-size: 12px; }
+    .chip .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .chip b { font-variant-numeric: tabular-nums; }
+    #showings { list-style: none; margin: 0; padding: 0 12px 14px; max-height: 190px; overflow-y: auto; }
+    #showings li { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    #showings li:hover { background: var(--panel2); }
+    #showings .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+    #showings .nm { font-weight: 600; }
+    #showings .su { color: var(--muted); }
+    #hotspot-list { list-style: none; margin: 0; padding: 0 12px 16px; }
+    #hotspot-list li { display: flex; gap: 10px; align-items: center; background: var(--panel2); border: 1px solid transparent; border-radius: 8px; padding: 8px 10px; margin: 5px 0; cursor: pointer; }
+    #hotspot-list li:hover { border-color: var(--gold); }
+    #hotspot-list li.active { border-color: var(--gold); background: #2a3444; }
+    #hotspot-list .rk { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: #1a222c; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    #hotspot-list .hn { font-weight: 600; font-size: 13px; text-transform: capitalize; }
+    #hotspot-list .hm { color: var(--muted); font-size: 11px; margin-top: 2px; display: flex; gap: 8px; }
+    #map { height: 100vh; }
+    .legend { background: rgba(26,34,44,.92); color: var(--ink); padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.6; }
+    .legend .bar { height: 10px; width: 160px; border-radius: 3px; margin: 4px 0 2px; background: linear-gradient(90deg, #440154, #3b528b, #21918c, #5ec962, #fde725); }
+    .legend .ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; }
+    .leaflet-popup-content-wrapper { background: var(--panel); color: var(--ink); }
+    .leaflet-popup-tip { background: var(--panel); }
+    .pop h3 { margin: 0 0 6px; font-size: 14px; }
+    .pop table { border-collapse: collapse; font-size: 12px; }
+    .pop td { padding: 2px 8px 2px 0; }
+    .pop td.k { color: var(--muted); }
+    .pop a { color: var(--accent); }
+    /* --- guided-flow steps --- */
+    .region-pick { display: block; margin-top: 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+    .region-pick select { width: 100%; margin-top: 4px; background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; font-size: 13px; text-transform: none; letter-spacing: 0; cursor: pointer; }
+    #help-btn { float: right; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel2); color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; line-height: 1; }
+    #help-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .step { padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .step-h { font-size: 13px; font-weight: 700; letter-spacing: .3px; display: flex; align-items: center; gap: 9px; }
+    .step-h .num { flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #0f1419; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .explain { margin: 7px 0 10px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+    .explain b { color: var(--ink); font-weight: 600; }
+    label.tgl { font-size: 12.5px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--muted); margin: 7px 0; }
+    label.tgl input { accent-color: var(--accent); width: 15px; height: 15px; }
+    .scale { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); margin-top: 6px; }
+    .scalebar { height: 8px; flex: 1; border-radius: 3px; }
+    .scalebar.prosp { background: linear-gradient(90deg, #0f1419, #57106e, #bc3754, #f98e09, #fcffa4); }
+    .scalebar.score { background: linear-gradient(90deg, #440154, #3b528b, #21918c, #5ec962, #fde725); }
+    details.more, details.legend-panel { border-bottom: 1px solid var(--line); }
+    details > summary { padding: 12px 20px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; list-style: none; user-select: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::before { content: "▸ "; color: var(--accent); }
+    details[open] > summary::before { content: "▾ "; }
+    details.more[open], details.legend-panel[open] { padding-bottom: 10px; }
+    details.more > label.tgl, details.more > #minerals { padding-left: 20px; padding-right: 20px; }
+    .map-legend { background: rgba(20,27,36,.94); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 4px; max-width: 240px; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+    .ml-head { font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; gap: 12px; padding-bottom: 2px; }
+    .ml-tog { color: var(--muted); }
+    .map-legend #legend-body { font-size: 12px; padding: 4px 0 2px; }
+    .lg-row { display: flex; align-items: center; gap: 9px; margin: 7px 0; line-height: 1.35; }
+    .lg-row .sw { flex: none; width: 16px; height: 16px; border-radius: 4px; }
+    .lg-row .sw.line { height: 0; border-top-width: 3px; border-top-style: solid; border-radius: 0; }
+    .lg-row .sw.dot { border-radius: 50%; width: 12px; height: 12px; }
+    .lg-row small { color: var(--muted); display: block; font-size: 11px; }
+    /* --- intro modal --- */
+    .modal-bg { position: fixed; inset: 0; background: rgba(6,10,14,.72); display: flex; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(2px); }
+    .modal { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; max-width: 460px; padding: 26px 28px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+    .modal h2 { margin: 0 0 12px; font-size: 20px; }
+    .modal p { font-size: 13.5px; line-height: 1.55; color: var(--ink); margin: 10px 0; }
+    .intro-steps { margin: 14px 0; padding-left: 20px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+    .intro-steps li { margin: 8px 0; }
+    .intro-steps b { color: var(--ink); }
+    .modal-note { font-size: 12px !important; color: var(--muted) !important; }
+    #intro-ok { margin-top: 8px; background: var(--accent); color: #0f1419; border: none; border-radius: 8px; padding: 11px 18px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    @media (max-width: 720px) { #app { grid-template-columns: 1fr; grid-template-rows: 260px 1fr; } #map { height: 100%; } }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <header>
+        <h1>Subsuelo <button id="help-btn" title="What is this?">?</button></h1>
+        <div class="sub">Sn·W·Li prospectivity + land screening</div>
+        <label class="region-pick" id="region-pick" style="display:none">Area
+          <select id="region-sel"></select>
+        </label>
+      </header>
+      <div class="stats">
+        <div class="stat"><div class="n" id="s-parcels">–</div><div class="l" id="s-parcels-l">Parcels</div></div>
+        <div class="stat"><div class="n" id="s-occ">–</div><div class="l" id="s-occ-l">Showings</div></div>
+        <div class="stat"><div class="n" id="s-top">–</div><div class="l" id="s-top-l">Top score</div></div>
+      </div>
+
+      <!-- STEP 1 — prospectivity -->
+      <section class="step">
+        <div class="step-h"><span class="num">1</span> Prospectivity</div>
+        <p class="explain">The <b>heatmap</b> shades every point by how favourable its geology is for finding Sn·W·Li — a model trained on known deposits. <b>Brighter = more favourable.</b> Pick a metal below to see its own model.</p>
+        <div id="target-sel" class="targets" style="display:none">
+          <div class="t-label">Show the model for</div>
+          <div class="t-btns" id="t-btns"></div>
+          <div id="t-note" class="src"></div>
+        </div>
+        <label class="tgl"><input type="checkbox" id="c-raster" checked /> Prospectivity heatmap</label>
+        <div class="scale"><span>low</span><div class="scalebar prosp"></div><span>high</span></div>
+      </section>
+
+      <!-- STEP 2 — hotspots -->
+      <section class="step" id="step-hs" style="display:none">
+        <div class="step-h"><span class="num">2</span> Prospective areas</div>
+        <p class="explain">The model's top-ranked targets. <b>Click one</b> to zoom in — in Spain it loads the land parcels there.</p>
+        <div id="hs-note" class="src"></div>
+        <ul id="hotspot-list"></ul>
+        <label class="tgl" id="l-hs" style="display:none"><input type="checkbox" id="c-hs" checked /> Show hotspot outlines</label>
+      </section>
+
+      <!-- STEP 3 — parcels -->
+      <section class="step" id="step-parcels" style="display:none">
+        <div class="step-h"><span class="num">3</span> Land parcels</div>
+        <p class="explain">Cadastral parcels scored for acquisition — prospectivity, price, and how much is <b>already legally claimed</b>. <span id="price-note" class="src"></span></p>
+        <ul id="list"></ul>
+        <label class="tgl" id="l-hp" style="display:none"><input type="checkbox" id="c-hp" /> Show parcels on map</label>
+        <label class="tgl"><input type="checkbox" id="c-parcels" checked /> Parcel scores</label>
+        <label class="tgl" id="l-conc" style="display:none"><input type="checkbox" id="c-conc" checked /> Mining concessions (already claimed)</label>
+        <label class="tgl" id="l-listed"><input type="checkbox" id="c-listed" /> Listed parcels only</label>
+      </section>
+
+      <!-- reference / advanced layers -->
+      <details class="more" id="ref-layers" style="display:none">
+        <summary>Reference layers &amp; data</summary>
+        <label class="tgl" id="l-occ" style="display:none"><input type="checkbox" id="c-occ" checked /> Mineral occurrences (real showings)</label>
+        <label class="tgl" id="l-rights" style="display:none"><input type="checkbox" id="c-rights" checked /> Mine workings</label>
+        <div id="minerals" style="display:none">
+          <div class="list-head">Occurrences by commodity</div>
+          <div id="commodity-chips" class="chips"></div>
+          <div class="list-head">Named Sn/W/Li showings <span id="occ-src" class="src"></span></div>
+          <ul id="showings"></ul>
+        </div>
+      </details>
+
+    </aside>
+    <div id="map"></div>
+  </div>
+
+  <!-- first-load intro -->
+  <div id="intro" class="modal-bg" style="display:none">
+    <div class="modal">
+      <h2>What is this?</h2>
+      <p><b>Subsuelo</b> screens where to look for — and buy land for — tin, tungsten and lithium, by fusing open geoscience with the property cadastre.</p>
+      <ol class="intro-steps">
+        <li><b>Prospectivity</b> — a geology model (Weights-of-Evidence) shades the map by how favourable the ground is for Sn·W·Li. Brighter = better.</li>
+        <li><b>Prospective areas</b> — the model ranks the best clusters into hotspots. Click one to drill in.</li>
+        <li><b>Land parcels</b> — for a hotspot, real cadastral parcels are scored and flagged where mining rights already exist.</li>
+      </ol>
+      <p class="modal-note">All data is real, open, public data (IGME · EGDI · Catastro · Minerals4EU). Switch the <b>metal</b> (top-left) to see each mineral's own model.</p>
+      <button id="intro-ok">Explore the map →</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const eur = n => n == null ? "—" : "€" + Math.round(n).toLocaleString();
+    const pct = n => n == null ? "—" : (n * 100).toFixed(0) + "%";
+
+    // viridis-ish ramp for parcel fill by score
+    function scoreColor(t) {
+      const stops = [[68,1,84],[59,82,139],[33,145,140],[94,201,98],[253,231,37]];
+      t = Math.max(0, Math.min(1, t));
+      const x = t * (stops.length - 1), i = Math.floor(x), f = x - i;
+      const a = stops[i], b = stops[Math.min(i + 1, stops.length - 1)];
+      const c = a.map((v, k) => Math.round(v + (b[k] - v) * f));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+
+    const COMMODITY = {
+      Li: { color: "#e15aa8", label: "Li — lithium" },
+      Sn: { color: "#4fd1c5", label: "Sn — tin" },
+      W:  { color: "#f6c454", label: "W — tungsten" },
+      Ta: { color: "#a78bfa", label: "Ta — tantalum" },
+      Nb: { color: "#fb923c", label: "Nb — niobium" },
+      other: { color: "#8b98a5", label: "other" },
+    };
+    const cinfo = c => COMMODITY[c] || COMMODITY.other;
+
+    // populate the Area dropdown from regions.json (multi-region builds only)
+    function setupRegionPicker() {
+      fetch("regions.json?_=" + Date.now()).then(r => r.ok ? r.json() : null).catch(() => null).then(list => {
+        if (!list || !list.length) return;                 // single-run: no picker
+        const sel = document.getElementById("region-sel");
+        list.forEach(r => { const o = document.createElement("option");
+          o.value = r.key; o.textContent = r.label || r.key; sel.appendChild(o); });
+        document.getElementById("region-pick").style.display = "block";
+        if (!REGION) { location.replace(location.pathname + "?region=" + list[0].key); return; }
+        sel.value = REGION;
+        sel.onchange = () => location.assign(location.pathname + "?region=" + sel.value);
+      });
+    }
+
+    // build the plain-language legend from whatever layers are currently active
+    function buildLegend() {
+      const rows = [];
+      rows.push(`<div class="lg-row"><span class="sw" style="background:linear-gradient(90deg,#0f1419,#bc3754,#fcffa4)"></span>
+        <span><b>Prospectivity</b><small>favourability of the ground for Sn·W·Li — brighter = better</small></span></div>`);
+      if (occLayer) rows.push(`<div class="lg-row"><span class="sw dot" style="background:${cinfo('W').color}"></span>
+        <span><b>Mineral occurrence</b><small>a real known showing — <span style="color:${cinfo('Sn').color}">Sn</span> · <span style="color:${cinfo('W').color}">W</span> · <span style="color:${cinfo('Li').color}">Li</span></small></span></div>`);
+      if (hotspotLayer) rows.push(`<div class="lg-row"><span class="sw" style="background:transparent;border:2px solid var(--gold)"></span>
+        <span><b>Hotspot</b><small>a top-ranked prospective area (numbered by rank)</small></span></div>`);
+      if (parcelLayer || hParcelLayer) rows.push(`<div class="lg-row"><span class="sw" style="background:linear-gradient(90deg,#440154,#21918c,#fde725)"></span>
+        <span><b>Parcel score</b><small>land ranked for acquisition — purple low, yellow high</small></span></div>`);
+      if (concLayer) rows.push(`<div class="lg-row"><span class="sw" style="background:rgba(255,90,90,.35);border:1.5px solid #ff5a5a"></span>
+        <span><b>Mining concession</b><small>ground already legally claimed (red = granted → hard to acquire)</small></span></div>`);
+      if (rightsLayer) rows.push(`<div class="lg-row"><span class="sw" style="background:none;color:#ff5a5a;font-weight:700;text-align:center">✕</span>
+        <span><b>Mine working</b><small>an actual worked deposit (red = active)</small></span></div>`);
+      document.getElementById("legend-body").innerHTML = rows.join("");
+    }
+
+    const map = L.map("map", { zoomControl: true });
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: "&copy; OpenStreetMap &copy; CARTO", maxZoom: 19,
+    }).addTo(map);
+
+    let rasterLayer, parcelLayer, occLayer, rightsLayer, concLayer, hotspotLayer, hParcelLayer, meta, smin, smax;
+    let target = null, curMin = 0, curMax = 1;   // active commodity target (null = combined)
+    const rows = {};   // parcel_id -> {el, layer}
+    const skey = () => target ? "score_" + target : "score";
+    const pkey = () => target ? "prospectivity_" + target : "prospectivity";
+    const norm = s => (curMax > curMin) ? (s - curMin) / (curMax - curMin) : 0.5;
+
+    // region switching: ?region=<key> loads out/web/regions/<key>/; else top-level.
+    // cache-bust because pipeline outputs change between runs.
+    const REGION = new URLSearchParams(location.search).get("region") || "";
+    const BASE = REGION ? "regions/" + REGION + "/" : "";
+    const CB = "?_=" + Date.now();
+    const A = p => BASE + p + CB;                 // cache-busted asset URL
+    setupRegionPicker();
+    Promise.all([
+      fetch(A("meta.json")).then(r => r.json()),
+      fetch(A("parcels.geojson")).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(A("occurrences.geojson")).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(A("mining_workings.geojson")).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(A("hotspots.geojson")).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(A("hotspot_parcels.geojson")).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(A("mining_concessions.geojson")).then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([m, gj, occ, rights, hotspots, hparcels, concessions]) => {
+      meta = m; smin = m.score_min; smax = m.score_max;
+      const hasParcels = !!gj && m.n_parcels > 0;
+      document.querySelector("header .sub").textContent =
+        m.region === "europe" ? "Sn·W·Li prospectivity — Variscan Europe (EGDI 1:1M)"
+        : hasParcels ? "Sn·W·Li prospectivity + land screening — Cáceres window"
+        : "Sn·W·Li prospectivity — peninsular Spain, national 1:1M model";
+      // stats adapt: parcel runs show parcels/score; region runs show
+      // showings/hotspots/top-target (so nothing reads as a meaningless "—")
+      const setStat = (n, l, v, lbl) => {
+        document.getElementById(n).textContent = v; document.getElementById(l).textContent = lbl; };
+      if (hasParcels) {
+        setStat("s-parcels", "s-parcels-l", m.n_parcels, "Parcels");
+        setStat("s-occ", "s-occ-l", m.n_occurrences || m.n_listed || 0, m.n_occurrences ? "Showings" : "Listed");
+        setStat("s-top", "s-top-l", m.score_max.toFixed(3), "Top score");
+      } else {
+        const top = (m.hotspots || [])[0];
+        setStat("s-parcels", "s-parcels-l", m.n_occurrences || 0, "Showings");
+        setStat("s-occ", "s-occ-l", (m.hotspots || []).length, "Hotspots");
+        setStat("s-top", "s-top-l", top ? (top.provincia || "—").toLowerCase() : "—", "Top target");
+      }
+      if (!m.n_listed) document.getElementById("l-listed").style.display = "none";
+      if (hasParcels) document.getElementById("step-parcels").style.display = "block";
+
+      rasterLayer = L.imageOverlay(A("prospectivity.png"), m.raster_bounds, { opacity: 0.7 }).addTo(map);
+
+      if (occ) buildOccurrences(occ, m);
+      if (rights) buildMiningWorkings(rights, m);
+      if (concessions) buildConcessions(concessions, m);
+      if (hotspots) buildHotspots(hotspots, hparcels, m);
+
+      if (hasParcels) {
+        parcelLayer = L.geoJSON(gj, {
+          style: f => ({
+            color: "#0f1419", weight: 0.4, fillOpacity: 0.65,
+            fillColor: scoreColor(norm(f.properties[skey()])),
+          }),
+          onEachFeature: (f, layer) => {
+            const p = f.properties;
+            layer.bindPopup(() => popupHtml(p), { maxWidth: 280 });
+            layer.on("click", () => selectParcel(p.parcel_id, false));
+            if (!rows[p.parcel_id]) rows[p.parcel_id] = {};
+            rows[p.parcel_id].layer = layer;
+          },
+        }).addTo(map);
+      }
+
+      // Fit to parcels if present, else to the raster extent. invalidateSize
+      // guards against a zero-sized container (zoom-0 world / zoom-max cell);
+      // maxZoom caps over-zoom; refits cover slow layout.
+      const bounds = hasParcels ? parcelLayer.getBounds() : L.latLngBounds(m.raster_bounds);
+      // getBoundsZoom + setView (non-animated), gated on a real container size.
+      // fitBounds mis-computes zoom for large extents and races across the
+      // init callbacks; and the container can be 0-height at load, which would
+      // otherwise pin the view to max zoom. A ResizeObserver fits once a real
+      // height arrives, then disconnects so it won't fight the user's panning.
+      let fitted = false;
+      const fit = () => {
+        if (fitted || map.getContainer().clientHeight < 50) return;
+        map.invalidateSize();
+        const z = Math.min(map.getBoundsZoom(bounds, false, [20, 20]), hasParcels ? 12 : 8);
+        map.setView(bounds.getCenter(), z, { animate: false });
+        fitted = true;
+        ro.disconnect();
+      };
+      const ro = new ResizeObserver(fit);
+      ro.observe(map.getContainer());
+      map.whenReady(fit);
+      window.addEventListener("load", fit);
+      setTimeout(fit, 400);
+      buildTargetSelector(m);
+      applyTarget(null);
+      applyListedFilter();
+      buildLegend();
+    });
+
+    // --- target-commodity selector: switch heatmap + parcel ranking per metal ---
+    function buildTargetSelector(m) {
+      const models = m.commodity_models || [];
+      if (!models.length) return;
+      document.getElementById("target-sel").style.display = "block";
+      const box = document.getElementById("t-btns");
+      const mk = (key, label, dot) => {
+        const b = document.createElement("button");
+        b.dataset.key = key || "";
+        b.innerHTML = (dot ? `<span class="dot" style="background:${dot}"></span>` : "") + label;
+        b.onclick = () => applyTarget(key);
+        box.appendChild(b);
+      };
+      mk(null, "All");
+      models.forEach(cm => mk(cm.key, cm.key, cinfo(cm.key).color));
+    }
+
+    function applyTarget(t) {
+      target = t;
+      const model = t ? (meta.commodity_models || []).find(c => c.key === t) : null;
+      curMin = model ? model.score_min : meta.score_min;
+      curMax = model ? model.score_max : meta.score_max;
+
+      rasterLayer.setUrl(A(t ? `prospectivity_${t}.png` : "prospectivity.png"));
+      if (parcelLayer) {
+        parcelLayer.setStyle(f => ({ fillColor: scoreColor(norm(f.properties[skey()])) }));
+        applyListedFilter();
+      }
+      // filter the occurrence dots to the chosen metal (visible feedback)
+      if (occLayer) occLayer.eachLayer(l => {
+        const c = l.feature.properties.commodity;
+        const show = !t || c === t, big = ["Sn","W","Li","Ta","Nb"].includes(c);
+        l.setStyle({ opacity: show ? 1 : 0, fillOpacity: show ? (big ? 0.95 : 0.5) : 0 });
+      });
+      buildRanked();
+
+      // button active state + note
+      document.querySelectorAll("#t-btns button").forEach(b =>
+        b.classList.toggle("on", (b.dataset.key || "") === (t || "")));
+      const note = document.getElementById("t-note");
+      if (!t) note.textContent = "Combined Sn·W·Li model";
+      else note.innerHTML = model.reliable
+        ? `Trained on ${model.n_train} ${t} showings`
+        : `⚠ only ${model.n_train} ${t} showings — indicative, not reliable`;
+      document.getElementById("price-note").textContent =
+        meta.has_price === false ? "· price N/A (no idealista access)" : "";
+      const ll = document.getElementById("legend-label");
+      if (ll) ll.textContent = t ? `${t} prospectivity score` : "Composite score";
+    }
+
+    // ranked list built from the loaded parcels, sorted by the active score key
+    function buildRanked() {
+      const ul = document.getElementById("list");
+      ul.innerHTML = "";
+      if (!parcelLayer) return;
+      const key = skey(), pk = pkey();
+      const feats = parcelLayer.getLayers()
+        .map(l => l.feature.properties)
+        .sort((a, b) => (b[key] ?? 0) - (a[key] ?? 0))
+        .slice(0, 25);
+      feats.forEach(p => {
+        const li = document.createElement("li");
+        li.className = "row";
+        li.innerHTML = `<div class="top"><span class="pid">${p.parcel_id} ${p.listed ? '<span class="badge">listed</span>' : ''}</span>
+          <span class="score">${(p[key] ?? 0).toFixed(3)}</span></div>
+          <div class="meta"><span>prosp ${pct(p[pk])}</span><span>${p.municipio || ""}</span><span>${p.area_ha?.toFixed(0)} ha</span></div>`;
+        li.onclick = () => selectParcel(p.parcel_id, true);
+        ul.appendChild(li);
+        if (!rows[p.parcel_id]) rows[p.parcel_id] = {};
+        rows[p.parcel_id].el = li;
+      });
+    }
+
+    function popupHtml(p) {
+      const label = target ? `${target} score` : "Composite score";
+      return `<div class="pop"><h3>${p.parcel_id} ${p.listed ? '<span class="badge">listed</span>' : ''}</h3>
+        <table>
+          <tr><td class="k">${label}</td><td><b>${(p[skey()] ?? 0).toFixed(3)}</b></td></tr>
+          <tr><td class="k">Prospectivity</td><td>${pct(p[pkey()])}</td></tr>
+          <tr><td class="k">Cheapness</td><td>${pct(p.cheapness)}</td></tr>
+          <tr><td class="k">Friction</td><td>${pct(p.friction)}</td></tr>
+          <tr><td class="k">€/ha</td><td>${eur(p.eur_ha_effective)}</td></tr>
+          <tr><td class="k">Protected</td><td>${pct(p.protected_frac)}</td></tr>
+          ${p.claimed_frac ? `<tr><td class="k">In concession</td><td>${pct(p.claimed_frac)}</td></tr>` : ''}
+          <tr><td class="k">Municipio</td><td>${p.municipio || "—"}</td></tr>
+          <tr><td class="k">Area</td><td>${p.area_ha?.toFixed(0)} ha</td></tr>
+          ${p.listing_url ? `<tr><td class="k">Listing</td><td><a href="${p.listing_url}" target="_blank">open ↗</a></td></tr>` : ''}
+        </table></div>`;
+    }
+
+    const occById = {};
+    function buildOccurrences(gj, m) {
+      document.getElementById("minerals").style.display = "block";
+      document.getElementById("l-occ").style.display = "flex";
+      document.getElementById("ref-layers").style.display = "block";
+      document.getElementById("occ-src").textContent = "· IGME BDMIN (real)";
+
+      // points, colored by commodity; Sn/W/Li drawn larger and on top
+      occLayer = L.geoJSON(gj, {
+        pointToLayer: (f, latlng) => {
+          const c = f.properties.commodity;
+          const target = ["Sn","W","Li","Ta","Nb"].includes(c);
+          return L.circleMarker(latlng, {
+            radius: target ? 6 : 4, color: "#0f1419", weight: 1,
+            fillColor: cinfo(c).color, fillOpacity: target ? 0.95 : 0.5,
+          });
+        },
+        onEachFeature: (f, layer) => {
+          const p = f.properties;
+          layer.bindPopup(`<div class="pop"><h3>${p.name || "(unnamed showing)"}</h3>
+            <table>
+              <tr><td class="k">Substance</td><td><b>${p.sustancia || "—"}</b></td></tr>
+              <tr><td class="k">Association</td><td>${(p.asociacion || "—").trim() || "—"}</td></tr>
+              <tr><td class="k">Morphology</td><td>${(p.morfologia || "—").trim() || "—"}</td></tr>
+              <tr><td class="k">Municipio</td><td>${p.municipio || "—"}</td></tr>
+            </table><div class="src" style="margin-top:6px">IGME BDMIN occurrence</div></div>`);
+          const oid = (p.name || "") + "|" + (p.municipio || "");
+          occById[oid] = layer;
+        },
+      }).addTo(map);
+
+      // commodity chips
+      const chips = document.getElementById("commodity-chips");
+      const order = ["Li", "Sn", "W", "other"];
+      order.filter(c => m.commodities[c]).forEach(c => {
+        const d = document.createElement("div");
+        d.className = "chip";
+        d.innerHTML = `<span class="dot" style="background:${cinfo(c).color}"></span>${cinfo(c).label} <b>${m.commodities[c]}</b>`;
+        chips.appendChild(d);
+      });
+
+      // clickable list of named Sn/W/Li showings
+      const ul = document.getElementById("showings");
+      (m.top_showings || []).forEach(s => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="dot" style="background:${cinfo(s.commodity).color}"></span>
+          <span><span class="nm">${s.name || "(unnamed)"}</span> — <span class="su">${s.sustancia}</span></span>`;
+        li.onclick = () => {
+          const layer = occById[(s.name || "") + "|" + (s.municipio || "")];
+          if (layer) { map.setView(layer.getLatLng(), 13); layer.openPopup(); }
+        };
+        ul.appendChild(li);
+      });
+    }
+
+    function buildMiningWorkings(gj, m) {
+      document.getElementById("l-rights").style.display = "flex";
+      document.getElementById("ref-layers").style.display = "block";
+      // mine workings as ✕ markers: active = solid red (a real friction signal),
+      // abandoned/inactive = hollow grey
+      rightsLayer = L.geoJSON(gj, {
+        pointToLayer: (f, latlng) => {
+          const active = f.properties.active;
+          return L.marker(latlng, {
+            icon: L.divIcon({
+              className: "work-marker",
+              html: `<span style="color:${active ? "#ff5a5a" : "#9aa7b3"};font-size:${active ? 15 : 12}px;font-weight:700;text-shadow:0 0 3px #0f1419">✕</span>`,
+              iconSize: [14, 14], iconAnchor: [7, 7],
+            }),
+          });
+        },
+        onEachFeature: (f, layer) => {
+          const p = f.properties;
+          layer.bindPopup(`<div class="pop"><h3>${(p.sustancia || "Mine working").trim()}</h3>
+            <table>
+              <tr><td class="k">Status</td><td><b>${p.estado || "—"}</b></td></tr>
+              <tr><td class="k">Form</td><td>${(p.forma || "—").trim() || "—"}</td></tr>
+              <tr><td class="k">Municipio</td><td>${p.municipio || "—"}</td></tr>
+            </table><div class="src" style="margin-top:6px">IGME BDMIN — mine working (exploitation)</div></div>`);
+        },
+      }).addTo(map);
+    }
+
+    function buildConcessions(gj, m) {
+      document.getElementById("l-conc").style.display = "flex";
+      if (concLayer) { concLayer.remove(); concLayer = null; }   // re-callable on hotspot switch
+      // legal mining rights: granted = solid red (blocks acquisition),
+      // pending = orange dashed, lapsed = muted grey dashed
+      const styleFor = s => s === "granted" ? { color: "#ff5a5a", fill: "#ff5a5a", fo: 0.22, dash: null }
+        : s === "pending" ? { color: "#f6954c", fill: "#f6954c", fo: 0.14, dash: "5 4" }
+        : { color: "#7a8791", fill: "#7a8791", fo: 0.06, dash: "3 4" };
+      const on = document.getElementById("c-conc").checked;
+      concLayer = L.geoJSON(gj, {
+        style: f => { const s = styleFor(f.properties.status);
+          return { color: s.color, weight: 1.2, fillColor: s.fill, fillOpacity: s.fo, dashArray: s.dash }; },
+        onEachFeature: (f, layer) => {
+          const p = f.properties;
+          layer.bindPopup(`<div class="pop"><h3>${p.name || "(unnamed concession)"}</h3>
+            <table>
+              <tr><td class="k">Status</td><td><b>${p.status}</b></td></tr>
+              <tr><td class="k">Code</td><td>${p.tipo || "—"}</td></tr>
+              <tr><td class="k">Blocks acquisition</td><td>${p.blocks ? "yes" : "no"}</td></tr>
+            </table><div class="src" style="margin-top:6px">Catastro Minero — legal mining right</div></div>`);
+        },
+      });
+      if (on) concLayer.addTo(map);
+    }
+
+    // (re)build the top-hotspot parcels layer from a GeoJSON
+    let hParcelById = {};
+    function renderHotspotParcels(gj) {
+      if (hParcelLayer) { hParcelLayer.remove(); hParcelLayer = null; }
+      hParcelById = {};
+      if (!gj || !gj.features || !gj.features.length) return;
+      const vals = gj.features.map(f => f.properties.score);
+      const lo = Math.min(...vals), hi = Math.max(...vals);
+      hParcelLayer = L.geoJSON(gj, {
+        style: f => ({ color: "#0f1419", weight: 0.4, fillOpacity: 0.7,
+          fillColor: scoreColor((hi > lo) ? (f.properties.score - lo) / (hi - lo) : 0.5) }),
+        onEachFeature: (f, layer) => {
+          const p = f.properties;
+          hParcelById[p.parcel_id] = layer;
+          layer.bindPopup(`<div class="pop"><h3>${p.parcel_id}</h3><table>
+            <tr><td class="k">Score</td><td><b>${(p.score ?? 0).toFixed(3)}</b></td></tr>
+            <tr><td class="k">Prospectivity</td><td>${pct(p.prospectivity)}</td></tr>
+            ${p.claimed_frac ? `<tr><td class="k">In concession</td><td>${pct(p.claimed_frac)}</td></tr>` : ''}
+            <tr><td class="k">Municipio</td><td>${p.municipio || "—"}</td></tr>
+            <tr><td class="k">Area</td><td>${p.area_ha?.toFixed(0)} ha</td></tr>
+          </table><div class="src" style="margin-top:6px">Catastro parcel · drilled hotspot</div></div>`);
+        },
+      });
+      if (document.getElementById("c-hp").checked) hParcelLayer.addTo(map);
+      // populate the step-3 ranked list from the drilled parcels
+      const ul = document.getElementById("list");
+      ul.innerHTML = "";
+      gj.features.map(f => f.properties).sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+        .slice(0, 25).forEach(p => {
+          const li = document.createElement("li");
+          li.className = "row";
+          li.innerHTML = `<div class="top"><span class="pid">${p.parcel_id}</span>
+            <span class="score">${(p.score ?? 0).toFixed(3)}</span></div>
+            <div class="meta"><span>prosp ${pct(p.prospectivity)}</span><span>${p.municipio || ""}</span>${p.claimed_frac ? '<span style="color:#ff5a5a">claimed</span>' : ''}</div>`;
+          li.onclick = () => { const l = hParcelById[p.parcel_id];
+            if (l) { map.fitBounds(l.getBounds(), { maxZoom: 15, padding: [40, 40] }); l.openPopup(); } };
+          ul.appendChild(li);
+        });
+    }
+
+    // fetch + render a hotspot's parcels/concessions on demand, zoom to it
+    let activeHotspot = null;
+    function selectHotspot(rank) {
+      activeHotspot = rank;
+      const layer = hsById[rank];
+      if (layer) map.fitBounds(layer.getBounds(), { maxZoom: 11, padding: [30, 30] });
+      const h = (meta.hotspots || []).find(x => x.rank === rank) || {};
+      const note = document.getElementById("hs-note");
+      document.querySelectorAll("#hotspot-list li").forEach(li =>
+        li.classList.toggle("active", +li.dataset.rank === rank));
+      if (!h.n_parcels) {
+        renderHotspotParcels(null);
+        if (concLayer) { concLayer.remove(); concLayer = null; }
+        if (note) note.textContent = `Hotspot #${rank} — parcels not pre-computed`;
+        return;
+      }
+      if (note) note.textContent = `Hotspot #${rank}: loading ${h.n_parcels} parcels…`;
+      Promise.all([
+        fetch(A(`hotspot_parcels_${rank}.geojson`)).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(A(`hotspot_concessions_${rank}.geojson`)).then(r => r.ok ? r.json() : null).catch(() => null),
+      ]).then(([pj, cj]) => {
+        document.getElementById("c-hp").checked = true;   // show parcels for the drilled hotspot
+        renderHotspotParcels(pj);
+        if (cj) buildConcessions(cj, meta); else if (concLayer) { concLayer.remove(); concLayer = null; }
+        if (note) note.textContent =
+          `Hotspot #${rank} (${(h.provincia || "").toLowerCase()}): ${h.n_parcels} parcels, ${h.n_claimed || 0} in a concession`;
+        document.getElementById("step-parcels").style.display = "block";
+        document.getElementById("price-note").textContent =
+          `· hotspot #${rank}, ${(h.provincia || "").toLowerCase()}`;
+        buildLegend();
+      });
+    }
+
+    const hsById = {};
+    function buildHotspots(gj, hpGj, m) {
+      document.getElementById("l-hs").style.display = "flex";
+      document.getElementById("step-hs").style.display = "block";
+
+      // LayerGroup so polygons + rank markers travel together on the toggle
+      hotspotLayer = L.layerGroup().addTo(map);
+      const polys = L.geoJSON(gj, {
+        style: { color: "#f6c454", weight: 1.6, fillColor: "#f6c454", fillOpacity: 0.08 },
+        onEachFeature: (f, layer) => {
+          const p = f.properties;
+          hsById[p.rank] = layer;
+          layer.bindPopup(`<div class="pop"><h3>Hotspot #${p.rank} — ${(p.provincia || "").toLowerCase()}</h3>
+            <table>
+              <tr><td class="k">Showings</td><td><b>${p.n_occ}</b></td></tr>
+              <tr><td class="k">Area</td><td>${Math.round(p.area_km2).toLocaleString()} km²</td></tr>
+              <tr><td class="k">Lead metal</td><td>${p.top_commodity || "—"}</td></tr>
+              <tr><td class="k">Parcels</td><td>${p.n_parcels ? p.n_parcels + " (click to load)" : "—"}</td></tr>
+            </table><div class="src" style="margin-top:6px">connected high-prospectivity region</div></div>`);
+          layer.on("click", () => selectHotspot(p.rank));
+        },
+      });
+      polys.addTo(hotspotLayer);
+      // rank number marker at each polygon's centroid (second pass — hotspotLayer now exists)
+      polys.eachLayer(layer => {
+        const p = layer.feature.properties;
+        L.marker(layer.getBounds().getCenter(), { icon: L.divIcon({ className: "hs-rank",
+          html: `<span style="background:#f6c454;color:#1a222c;font-weight:700;font-size:11px;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 4px #0f1419">${p.rank}</span>`,
+          iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(hotspotLayer);
+      });
+
+      // default drill = rank 1 (pre-loaded alias), off by default
+      if (hpGj) { renderHotspotParcels(hpGj); document.getElementById("l-hp").style.display = "flex"; }
+
+      // ranked hotspot list — click any to drill it
+      const ul = document.getElementById("hotspot-list");
+      (m.hotspots || []).forEach(h => {
+        const li = document.createElement("li");
+        li.dataset.rank = h.rank;
+        li.innerHTML = `<span class="rk">${h.rank}</span>
+          <span><span class="hn">${(h.provincia || "").toLowerCase()}</span>
+          <span class="hm"><span>${h.n_occ} showings</span><span>${Math.round(h.area_km2).toLocaleString()} km²</span><span>${h.n_parcels ? h.n_parcels + " parcels" : h.top_commodity || ""}</span></span></span>`;
+        li.onclick = () => selectHotspot(h.rank);
+        ul.appendChild(li);
+      });
+    }
+
+    let active;
+    function selectParcel(id, fromList) {
+      if (active && rows[active]?.el) rows[active].el.classList.remove("active");
+      active = id;
+      const r = rows[id];
+      if (!r) return;
+      if (r.el) { r.el.classList.add("active"); if (fromList) r.el.scrollIntoView({ block: "nearest" }); }
+      if (r.layer) {
+        map.fitBounds(r.layer.getBounds(), { maxZoom: 13, padding: [40, 40] });
+        r.layer.openPopup();
+      }
+    }
+
+    function applyListedFilter() {
+      const only = document.getElementById("c-listed").checked;
+      if (!parcelLayer) return;
+      parcelLayer.eachLayer(l => {
+        const listed = l.feature.properties.listed;
+        const show = !only || listed;
+        l.setStyle({ fillOpacity: show ? 0.65 : 0, opacity: show ? 1 : 0 });
+      });
+    }
+
+    document.getElementById("c-raster").onchange = e =>
+      e.target.checked ? rasterLayer.addTo(map) : rasterLayer.remove();
+    document.getElementById("c-parcels").onchange = e =>
+      e.target.checked ? parcelLayer.addTo(map) : parcelLayer.remove();
+    document.getElementById("c-listed").onchange = applyListedFilter;
+    document.getElementById("c-occ").onchange = e => {
+      if (!occLayer) return;
+      e.target.checked ? occLayer.addTo(map) : occLayer.remove();
+    };
+    document.getElementById("c-rights").onchange = e => {
+      if (!rightsLayer) return;
+      e.target.checked ? rightsLayer.addTo(map) : rightsLayer.remove();
+    };
+    document.getElementById("c-conc").onchange = e => {
+      if (!concLayer) return;
+      e.target.checked ? concLayer.addTo(map) : concLayer.remove();
+    };
+    document.getElementById("c-hs").onchange = e => {
+      if (!hotspotLayer) return;
+      e.target.checked ? hotspotLayer.addTo(map) : hotspotLayer.remove();
+    };
+    document.getElementById("c-hp").onchange = e => {
+      if (!hParcelLayer) return;
+      e.target.checked ? hParcelLayer.addTo(map) : hParcelLayer.remove();
+    };
+
+    // on-map legend (bottom-right, collapsible); buildLegend() fills #legend-body
+    const legendCtl = L.control({ position: "bottomright" });
+    legendCtl.onAdd = () => {
+      const d = L.DomUtil.create("div", "map-legend");
+      d.innerHTML = `<div class="ml-head">Legend <span class="ml-tog">▾</span></div><div id="legend-body"></div>`;
+      L.DomEvent.disableClickPropagation(d);
+      d.querySelector(".ml-head").onclick = () => {
+        const b = d.querySelector("#legend-body"), open = b.style.display !== "none";
+        b.style.display = open ? "none" : "block";
+        d.querySelector(".ml-tog").textContent = open ? "▸" : "▾";
+      };
+      return d;
+    };
+    legendCtl.addTo(map);
+
+    // first-load intro + help button
+    const intro = document.getElementById("intro");
+    const closeIntro = () => { intro.style.display = "none"; try { localStorage.setItem("subsuelo_seen", "1"); } catch (e) {} };
+    document.getElementById("intro-ok").onclick = closeIntro;
+    intro.onclick = e => { if (e.target === intro) closeIntro(); };
+    document.getElementById("help-btn").onclick = () => { intro.style.display = "flex"; };
+    let seen = false; try { seen = localStorage.getItem("subsuelo_seen"); } catch (e) {}
+    if (!seen) intro.style.display = "flex";
+  </script>
+</body>
+</html>
