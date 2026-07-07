@@ -61,6 +61,8 @@ label.tgl input { accent-color: var(--accent); width: 15px; height: 15px; }
 /* --- metal/region chips: one scrollable row, never wraps --- */
 .chip-strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
 .chip-strip::-webkit-scrollbar { display: none; }
+.chip-sep { flex: none; width: 1px; align-self: stretch; background: var(--line); margin: 2px 3px; }
+.step .chip-strip { margin: 10px 0 2px; }
 .chip { flex: none; display: flex; align-items: center; gap: 6px; background: var(--panel2); color: var(--ink); border: 1px solid transparent; border-radius: 20px; padding: 6px 13px; font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .chip:hover { border-color: var(--muted); }
 .chip.on { border-color: var(--accent); color: var(--accent); background: rgba(79,209,197,.1); }

@@ -1,11 +1,39 @@
+import { useMemo, useState } from "react";
 import type { Feature } from "geojson";
 import { pct } from "../data.ts";
 import type {
-  Drill, IndexParcel, Meta, ParcelProps, RegionData, RegionInfo, Target, Toggles,
+  Drill, Hotspot, IndexParcel, Meta, ParcelProps, RegionData, RegionInfo, Target, Toggles,
 } from "../types";
 import ParcelDetail from "./ParcelDetail.tsx";
 import SearchPanel from "./SearchPanel.tsx";
 import MetalChips from "./MetalChips.tsx";
+
+type HsSort = "rank" | "occ" | "area";
+const HS_SORTERS: Record<HsSort, (h: Hotspot) => number> = {
+  rank: (h) => h.rank,          // ascending — already best-first
+  occ: (h) => -h.n_occ,         // most showings first
+  area: (h) => -h.area_km2,     // biggest area first
+};
+const HS_SORT_LABELS: [HsSort, string][] = [["rank", "Rank"], ["occ", "Showings"], ["area", "Area"]];
+
+type PcSort = "score" | "area" | "price" | "prosp";
+// ascending sort key for every field; missing data always sinks to the bottom
+// regardless of which field is "better high" (score/area/prospectivity) or
+// "better low" (price — cheaper is preferred, matching the cheapness score).
+const numKey = (v: unknown, invert: boolean): number => {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return Infinity;
+  return invert ? -n : n;
+};
+const PC_SORTERS: Record<PcSort, (p: ParcelProps) => number> = {
+  score: (p) => numKey(p.score, true),
+  area: (p) => numKey(p.area_ha, true),
+  price: (p) => numKey(p.eur_ha_effective, false),
+  prosp: (p) => numKey(p.prospectivity, true),
+};
+const PC_SORT_LABELS: [PcSort, string][] = [
+  ["score", "Score"], ["area", "Area"], ["price", "Price"], ["prosp", "Prospectivity"],
+];
 
 interface SidebarProps {
   regions: RegionInfo[];
@@ -49,6 +77,23 @@ export default function Sidebar(props: SidebarProps) {
   const model = target ? models.find((m) => m.key === target) : null;
   const activeH = hotspots.find((h) => h.rank === activeHotspot);
   const drillParcels: Feature[] = drill?.parcels?.features || [];
+
+  const [hsSort, setHsSort] = useState<HsSort>("rank");
+  const [hsDrillableOnly, setHsDrillableOnly] = useState(false);
+  const sortedHotspots = useMemo(() => {
+    const list = hsDrillableOnly ? hotspots.filter((h) => h.n_parcels > 0) : hotspots;
+    return [...list].sort((a, b) => HS_SORTERS[hsSort](a) - HS_SORTERS[hsSort](b));
+  }, [hotspots, hsSort, hsDrillableOnly]);
+
+  const [pcSort, setPcSort] = useState<PcSort>("score");
+  const [pcExcludeClaimed, setPcExcludeClaimed] = useState(false);
+  const sortedParcels = useMemo(() => {
+    let list = drillParcels;
+    if (pcExcludeClaimed) list = list.filter((f) => !(Number(f.properties?.claimed_frac) > 0));
+    return [...list].sort((a, b) =>
+      PC_SORTERS[pcSort]((a.properties || {}) as ParcelProps) - PC_SORTERS[pcSort]((b.properties || {}) as ParcelProps));
+  }, [drillParcels, pcSort, pcExcludeClaimed]);
+  const shownParcels = sortedParcels.slice(0, 25);
 
   const stats: [string | number, string, boolean?][] = hasParcels
     ? [[meta!.n_parcels, "Parcels"],
@@ -129,8 +174,20 @@ export default function Sidebar(props: SidebarProps) {
             {drill?.loading
               ? <div className="note"><span className="spinner" /> Loading parcels…</div>
               : hsNote && <div className="note">{hsNote}</div>}
+            <div className="chip-strip">
+              {HS_SORT_LABELS.map(([key, label]) => (
+                <button key={key} className={"chip" + (hsSort === key ? " on" : "")}
+                  onClick={() => setHsSort(key)}>{label}</button>
+              ))}
+              <span className="chip-sep" />
+              <button className={"chip" + (hsDrillableOnly ? " on" : "")}
+                onClick={() => setHsDrillableOnly((v) => !v)}>Drillable only</button>
+            </div>
+            {hsDrillableOnly && !sortedHotspots.length && (
+              <div className="note">No drillable hotspots yet in this region — try All.</div>
+            )}
             <ul className="rows">
-              {hotspots.map((h) => (
+              {sortedHotspots.map((h) => (
                 <li key={h.rank} className={"hs-row" + (h.rank === activeHotspot ? " active" : "")}
                   onClick={() => selectHotspot(h.rank)}>
                   <span className="rk">{h.rank}</span>
@@ -151,8 +208,21 @@ export default function Sidebar(props: SidebarProps) {
             <p className="explain">Cadastral parcels scored for acquisition — prospectivity, price, and how
               much is <b>already legally claimed</b>. <span className="muted">· hotspot #{drill!.rank}</span></p>
             {selectedParcel && <ParcelDetail p={selectedParcel} onClose={clearParcel} />}
+            <div className="chip-strip">
+              {PC_SORT_LABELS.map(([key, label]) => (
+                <button key={key} className={"chip" + (pcSort === key ? " on" : "")}
+                  onClick={() => setPcSort(key)}>{label}</button>
+              ))}
+              <span className="chip-sep" />
+              <button className={"chip" + (pcExcludeClaimed ? " on" : "")}
+                onClick={() => setPcExcludeClaimed((v) => !v)}>Exclude claimed</button>
+            </div>
+            {sortedParcels.length > 0 && (
+              <div className="note">showing top {shownParcels.length} of {sortedParcels.length.toLocaleString()}
+                {pcExcludeClaimed || sortedParcels.length !== drillParcels.length ? " (filtered)" : ""}</div>
+            )}
             <ul className="rows">
-              {[...drillParcels].sort((a, b) => (Number(b.properties?.score) || 0) - (Number(a.properties?.score) || 0)).slice(0, 25).map((f) => {
+              {shownParcels.map((f) => {
                 const p = (f.properties || {}) as ParcelProps;
                 return (
                   <li key={p.parcel_id} className={"pc-row" + (selectedParcel?.parcel_id === p.parcel_id ? " active" : "")}
@@ -164,6 +234,7 @@ export default function Sidebar(props: SidebarProps) {
                   </li>
                 );
               })}
+              {!shownParcels.length && <li className="note">No parcels match — clear a filter.</li>}
             </ul>
           </section>
         )}

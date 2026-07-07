@@ -7,6 +7,7 @@ __pycache__/
 # Node / build
 node_modules/
 subsuelo/webapp/dist/
+subsuelo/webapp/*.tsbuildinfo
 
 # Generated pipeline output + raw-download cache (rebuilt by `python build.py`;
 # the deployed site ships from the gh-pages branch or the Actions artifact)
