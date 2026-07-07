@@ -28,13 +28,12 @@ interface SidebarProps {
   onPickParcel: (p: IndexParcel) => void;
 }
 
-function subtitleFor(meta: Meta | null | undefined, hasParcels: boolean): string {
+// the descriptive subtitle is authored once, per region, in subsuelo/regions.py
+// (Region.label) and travels through meta.json — no per-region copy to keep in
+// sync here (a prior hardcoded version went stale when Europe's scope grew).
+function subtitleFor(meta: Meta | null | undefined): string {
   if (!meta) return "loading…";
-  if (meta.region === "europe") return "Sn·W·Li prospectivity — Variscan Europe (EGDI 1:1M)";
-  if (meta.region === "iberia") return "Cu·Zn·Pb·Ag prospectivity — Iberian Pyrite Belt (VMS)";
-  if (hasParcels) return "Sn·W·Li prospectivity + land screening — Cáceres";
-  if (meta.region === "spain") return "Sn·W·Li prospectivity — peninsular Spain (IGME 1:1M)";
-  return meta.region_label || "mineral prospectivity";
+  return meta.region_description || meta.region_label || "mineral prospectivity";
 }
 
 export default function Sidebar(props: SidebarProps) {
@@ -66,7 +65,7 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <aside id="sidebar">
       <header>
-        <div className="sub">{subtitleFor(meta, hasParcels)}</div>
+        <div className="sub">{subtitleFor(meta)}</div>
         {regions.length > 1 && (
           <label className="region-pick">Area
             <select value={region} onChange={(e) => setRegion(e.target.value)}>

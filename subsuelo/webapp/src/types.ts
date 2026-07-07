@@ -40,6 +40,7 @@ export interface Meta {
   center: [number, number];
   region?: string;
   region_label?: string;
+  region_description?: string;
   n_parcels: number;
   n_occurrences: number;
   n_listed: number;

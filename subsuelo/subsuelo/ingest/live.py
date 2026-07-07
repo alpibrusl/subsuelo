@@ -174,9 +174,20 @@ def igme_national_faults(bbox_4326: tuple) -> gpd.GeoDataFrame:
 # EGDI — pan-European geology + Minerals4EU/FRAME occurrences (run_europe.py)   #
 # --------------------------------------------------------------------------- #
 
-def _egdi_wfs(typename: str, bbox_4326: tuple, page: int = 5000) -> gpd.GeoDataFrame:
-    """Paged EGDI WFS 2.0.0 GetFeature (GML — JSON output 500s), clipped to a
-    lon/lat bbox. Returns a GeoDataFrame in EPSG:4326 (empty on failure)."""
+# Above this bbox extent (degrees), a single geologicunitview/faults GetFeature
+# request comes back geographically thinned server-side, proportional to query
+# area — confirmed empirically by probing the SAME 10°×10° box (containing the
+# real, INSPIRE-mapped Cornwall granite) at shrinking tile sizes: 10° → 532
+# polys/0 in Cornwall, 5° → 746/0, 3° → 964/24, 2° → 969/25. It plateaus at 3°,
+# so that's the tile size used — smaller buys negligible extra completeness for
+# a lot more requests. Pagination alone doesn't catch this (each page reports
+# "no more results" well short of the true total), so large bboxes are tiled
+# and the per-tile results concatenated; each tile is cached independently.
+_EGDI_TILE_DEG = 3.0
+
+
+def _egdi_wfs_tile(typename: str, bbox_4326: tuple, page: int = 5000) -> gpd.GeoDataFrame:
+    """Paged EGDI WFS 1.1.0 GetFeature for a single (small-enough) bbox tile."""
     frames, start = [], 0
     while True:
         # WFS 1.1.0 + lon,lat bbox (2.0.0 + urn:EPSG::4326 forces lat,lon and
@@ -205,6 +216,29 @@ def _egdi_wfs(typename: str, bbox_4326: tuple, page: int = 5000) -> gpd.GeoDataF
     out["geometry"] = out.geometry.map(
         lambda g: _shp_transform(lambda x, y: (y, x), g) if g is not None else g)
     return out.set_crs("EPSG:4326", allow_override=True)
+
+
+def _tile_bbox(bbox_4326: tuple, tile_deg: float) -> list:
+    minx, miny, maxx, maxy = bbox_4326
+    import numpy as _np
+    xs = _np.arange(minx, maxx, tile_deg).tolist() or [minx]
+    ys = _np.arange(miny, maxy, tile_deg).tolist() or [miny]
+    return [(x, y, min(x + tile_deg, maxx), min(y + tile_deg, maxy)) for x in xs for y in ys]
+
+
+def _egdi_wfs(typename: str, bbox_4326: tuple, page: int = 5000) -> gpd.GeoDataFrame:
+    """EGDI WFS GetFeature clipped to a lon/lat bbox, in EPSG:4326 (empty on
+    failure). Transparently tiles bboxes wider/taller than `_EGDI_TILE_DEG` to
+    avoid the server-side thinning described above; each tile is independently
+    cached by net.http_get, so a wide-area rebuild replays cheaply."""
+    minx, miny, maxx, maxy = bbox_4326
+    if (maxx - minx) <= _EGDI_TILE_DEG and (maxy - miny) <= _EGDI_TILE_DEG:
+        return _egdi_wfs_tile(typename, bbox_4326, page)
+    frames = [_egdi_wfs_tile(typename, tile, page) for tile in _tile_bbox(bbox_4326, _EGDI_TILE_DEG)]
+    frames = [f for f in frames if len(f)]
+    if not frames:
+        return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+    return gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs="EPSG:4326")
 
 
 # EGDI INSPIRE `commodity` value -> our tag. The CRM layer omits tin; the full

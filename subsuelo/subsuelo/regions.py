@@ -72,23 +72,33 @@ REGIONS: dict[str, Region] = {
         parcels_provider=live.catastro_parcels_for,
         concessions_provider=live.concessions_for,
     ),
-    # Variscan W/Central Europe — EGDI pan-European geology + Minerals4EU/FRAME.
+    # Continental Europe — EGDI pan-European geology + Minerals4EU/FRAME.
+    # Iberia to the Baltics/Poland, Britain/Ireland to the Balkans, and the
+    # Fennoscandian Shield (Scandinavia) — confirmed by recon to carry a strong
+    # independent granite-pegmatite signal (~1.1k occurrences), on par with Iberia.
     "europe": Region(
-        key="europe", menu="Variscan Europe",
-        label="Sn·W·Li prospectivity — Variscan Europe (EGDI 1:1M)",
-        crs="EPSG:3035", cell_size=5000.0, lonlat=(-10.0, 36.0, 16.0, 55.0),
+        key="europe", menu="Europe",
+        label="Sn·W·Li·+ prospectivity — Europe (EGDI 1:1M)",
+        crs="EPSG:3035", cell_size=7000.0, lonlat=(-10.5, 35.0, 30.0, 68.0),
         granite=live.egdi_granite,
         faults=live.egdi_faults,
         occurrences=live.egdi_occurrences,
         near_granite_m=15_000.0, near_fault_m=20_000.0,
-        # ~2.9k Sn/W/Li showings across Europe → a high percentile keeps hotspots
-        # tight (a lower one merges the whole Variscan belt into one blob).
-        dens_sigma=3.0, target_pctl=96.0, top_k=15, min_cells=3,
+        # a high percentile keeps hotspots tight across a much larger, denser
+        # occurrence set (a lower one merges whole belts into one blob); top_k
+        # raised so distinct belts (Iberia/Erzgebirge/Cornwall/Fennoscandia/…)
+        # all get a slot instead of the densest belt crowding out the rest.
+        # 94th percentile empirically gives the best geographic spread across the
+        # much larger, richer dataset (22/22 top_k slots filled — Iberia, Sweden,
+        # Czechia, France all distinctly represented); higher percentiles merge
+        # more area into the #1 Iberia blob while dropping smaller real clusters
+        # elsewhere below the min_cells floor rather than shrinking them cleanly.
+        dens_sigma=3.0, target_pctl=94.0, top_k=22, min_cells=3,
         # drill hotspots to parcels where an open national cadastre exists
-        # (France, Czechia, Germany/Saxony); others (Portugal, Spain-in-EU-view)
-        # stay raster-only. Border-aware: a hotspot straddling DE/CZ (Erzgebirge)
-        # pulls both countries' parcels.
-        drill=True, drill_hotspots=15, parcel_min_area_ha=1.0, drill_radius_km=5.0,
+        # (France, Czechia, Germany/Saxony, Spain); others (Portugal, Scandinavia,
+        # Poland, …) stay raster-only. Border-aware: a hotspot straddling DE/CZ
+        # (Erzgebirge) pulls both countries' parcels.
+        drill=True, drill_hotspots=18, parcel_min_area_ha=1.0, drill_radius_km=5.0,
         parcels_bbox_provider=live.parcels_for_bbox,
     ),
     # Iberian Pyrite Belt — base metals (Cu/Zn/Pb/Ag) as VMS, hosted by felsic

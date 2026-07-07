@@ -196,7 +196,8 @@ def run(region: Region, outdir: str = "out") -> None:
         .to_file(f"{outdir}/occurrences.geojson", driver="GeoJSON")
     with open(f"{outdir}/commodities.json", "w") as f:
         json.dump({"min_train": MIN_TRAIN, "region": region.key,
-                   "region_label": region.menu or region.label, "commodities": [
+                   "region_label": region.menu or region.label,
+                   "region_description": region.label, "commodities": [
             {"key": c, "n_train": train.get(c, 0),
              # proxy commodities are host-mismatched → always "indicative"
              "reliable": train.get(c, 0) >= MIN_TRAIN and c not in region.proxy_commodities,

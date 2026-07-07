@@ -288,6 +288,7 @@ def export(outdir: str = "out") -> str:
             cj = json.load(f)
         occ_meta["region"] = cj.get("region")
         occ_meta["region_label"] = cj.get("region_label")
+        occ_meta["region_description"] = cj.get("region_description")
         for cm in cj.get("commodities", []):
             col = f"score_{cm['key']}"
             entry = dict(cm)
