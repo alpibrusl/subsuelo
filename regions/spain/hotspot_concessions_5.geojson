@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"name": "hotspot_concessions_5",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"xy_coordinate_resolution": 1e-05,
+"features": [
+{ "type": "Feature", "properties": { "name": "EL SALUGRAL", "tipo": "BO", "status": "granted", "blocks": true }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -5.89581, 40.26546 ], [ -5.89581, 40.27657 ], [ -5.8847, 40.27657 ], [ -5.8847, 40.27102 ], [ -5.87914, 40.27102 ], [ -5.87914, 40.25991 ], [ -5.86803, 40.25991 ], [ -5.86803, 40.2488 ], [ -5.87359, 40.2488 ], [ -5.87359, 40.24324 ], [ -5.90692, 40.24324 ], [ -5.90692, 40.25435 ], [ -5.8847, 40.25435 ], [ -5.8847, 40.26546 ], [ -5.89581, 40.26546 ] ] ] } },
+{ "type": "Feature", "properties": { "name": "FUENTE DE LOS HERMANOS", "tipo": "BO", "status": "granted", "blocks": true }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -5.58469, 40.15991 ], [ -5.58469, 40.13213 ], [ -5.61802, 40.13213 ], [ -5.61802, 40.15991 ], [ -5.58469, 40.15991 ] ] ] } }
+]
+}

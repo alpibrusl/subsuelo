@@ -1,0 +1,29 @@
+{
+  "built_at": "2026-07-12T08:40:13Z",
+  "mode": "cache (replay, fetch on miss)",
+  "regions": {
+    "iberia": {
+      "region": "iberia",
+      "granite_polygons": 147,
+      "fault_traces": 120,
+      "occurrences": 1844,
+      "commodity_counts": {
+        "Cu": 707,
+        "Pb": 603,
+        "Zn": 391,
+        "Ag": 143
+      },
+      "commodity_models": {},
+      "hotspots": 12,
+      "hotspots_drilled": 7,
+      "parcels_total": 1683,
+      "status": "ok",
+      "elapsed_s": 131.3,
+      "fetches": 13,
+      "fetched_live": 2,
+      "from_cache": 11,
+      "stale_fallbacks": 0,
+      "bytes_downloaded": 1561218
+    }
+  }
+}

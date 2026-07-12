@@ -1,0 +1,50 @@
+{
+  "built_at": "2026-07-12T12:05:06Z",
+  "mode": "cache (replay, fetch on miss)",
+  "regions": {
+    "europe": {
+      "region": "europe",
+      "granite_polygons": 11458,
+      "fault_traces": 57106,
+      "occurrences": 9741,
+      "commodity_counts": {
+        "W": 1906,
+        "Ba": 1633,
+        "U": 1568,
+        "Sn": 1411,
+        "As": 1047,
+        "Sb": 680,
+        "Mo": 678,
+        "Bi": 237,
+        "Li": 186,
+        "Be": 150,
+        "Ta": 126,
+        "Nb": 119
+      },
+      "commodity_models": {
+        "Sn": 1411,
+        "W": 1906,
+        "Li": 186,
+        "Ta": 126,
+        "Nb": 119,
+        "U": 1568,
+        "Mo": 678,
+        "Be": 150,
+        "Bi": 237,
+        "Ba": 1633,
+        "As": 1047,
+        "Sb": 680
+      },
+      "hotspots": 22,
+      "hotspots_drilled": 13,
+      "parcels_total": 9573,
+      "status": "ok",
+      "elapsed_s": 598.3,
+      "fetches": 339,
+      "fetched_live": 1,
+      "from_cache": 338,
+      "stale_fallbacks": 0,
+      "bytes_downloaded": 12104479
+    }
+  }
+}

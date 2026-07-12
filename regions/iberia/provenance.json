@@ -1,0 +1,80 @@
+[
+  {
+    "tag": "egdi:ms:geologicunitview",
+    "url": "https://maps.europe-geology.eu/wfs/",
+    "bytes": 8935722,
+    "cache": true
+  },
+  {
+    "tag": "egdi:ms:geologicunitview",
+    "url": "https://maps.europe-geology.eu/wfs/",
+    "bytes": 4497943,
+    "cache": true
+  },
+  {
+    "tag": "egdi:ms:hike_all_faults_layer",
+    "url": "https://maps.europe-geology.eu/wfs/",
+    "bytes": 458538,
+    "cache": true
+  },
+  {
+    "tag": "egdi:ms:hike_all_faults_layer",
+    "url": "https://maps.europe-geology.eu/wfs/",
+    "bytes": 719,
+    "cache": true
+  },
+  {
+    "tag": "egdi:occurrences",
+    "url": "https://maps.europe-geology.eu/wfs/",
+    "bytes": 67747821,
+    "cache": true
+  },
+  {
+    "tag": "cadastre:spain",
+    "url": "http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx",
+    "bytes": 3198518,
+    "cache": true
+  },
+  {
+    "tag": "cadastre:spain",
+    "url": "http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx",
+    "bytes": 2525929,
+    "cache": true
+  },
+  {
+    "tag": "cadastre:portugal",
+    "url": "https://snicws.dgterritorio.gov.pt/geoserver/inspire/wfs",
+    "bytes": 872807,
+    "cache": true
+  },
+  {
+    "tag": "cadastre:spain",
+    "url": "http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx",
+    "bytes": 2586688,
+    "cache": true
+  },
+  {
+    "tag": "cadastre:portugal",
+    "url": "https://snicws.dgterritorio.gov.pt/geoserver/inspire/wfs",
+    "bytes": 688411,
+    "cache": true
+  },
+  {
+    "tag": "cadastre:spain",
+    "url": "http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx",
+    "bytes": 1422904,
+    "cache": true
+  },
+  {
+    "tag": "cadastre:spain",
+    "url": "http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx",
+    "bytes": 7792089,
+    "cache": true
+  },
+  {
+    "tag": "eurostat:lprc",
+    "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/apri_lprc",
+    "bytes": 67962,
+    "cache": true
+  }
+]

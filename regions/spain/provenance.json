@@ -1,0 +1,494 @@
+[
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:4",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/4/query",
+    "bytes": 2285108,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:4",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/4/query",
+    "bytes": 2182938,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 292348,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 325800,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 312310,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 284123,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 281956,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 292024,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 264423,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 281296,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 259570,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 254217,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 268669,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 286938,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 340813,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 310737,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 271057,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 264477,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 258515,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 271529,
+    "cache": true
+  },
+  {
+    "tag": "igme:Cartografia_Geologica/IGME_Geologico_1M:2",
+    "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geologico_1M/MapServer/2/query",
+    "bytes": 361049,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 503293,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 492393,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 494255,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 499260,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 493997,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 519533,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 529409,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 526902,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 529104,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 535730,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 530366,
+    "cache": true
+  },
+  {
+    "tag": "igme:BasesDatos/IGME_BDMIN_Indicios:1",
+    "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_BDMIN_Indicios/MapServer/1/query",
+    "bytes": 394681,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_root",
+    "url": "http://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml",
+    "bytes": 685513,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_15",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/15/ES.SDGC.CP.atom_15.xml",
+    "bytes": 164971,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:15019",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/15/15019-CARBALLO/A.ES.SDGC.CP.15019.zip",
+    "bytes": 25506112,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:15058",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/15/15058-NOIA/A.ES.SDGC.CP.15058.zip",
+    "bytes": 6071301,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:15093",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/15/15093-VIMIANZO/A.ES.SDGC.CP.15093.zip",
+    "bytes": 12114115,
+    "cache": true
+  },
+  {
+    "tag": "miteco:concessions",
+    "url": "https://geoportal.minetur.gob.es/cgi-bin/mapservcm",
+    "bytes": 178214,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_root",
+    "url": "http://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml",
+    "bytes": 685513,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_37",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/37/ES.SDGC.CP.atom_37.xml",
+    "bytes": 637204,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:37044",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/37/37044-BARRUECOPARDO/A.ES.SDGC.CP.37044.zip",
+    "bytes": 1518495,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:37304",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/37/37304-SAUCELLE/A.ES.SDGC.CP.37304.zip",
+    "bytes": 660535,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:37123",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/37/37123-ENCINASOLA DE LOS COMENDADORES/A.ES.SDGC.CP.37123.zip",
+    "bytes": 603146,
+    "cache": true
+  },
+  {
+    "tag": "idecyl:concessions",
+    "url": "https://idecyl.jcyl.es/geoserver/mineria/wfs",
+    "bytes": 15236,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_root",
+    "url": "http://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml",
+    "bytes": 685513,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_10",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/ES.SDGC.CP.atom_10.xml",
+    "bytes": 392399,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10003",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10003-ACEBO/A.ES.SDGC.CP.10003.zip",
+    "bytes": 1625343,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10145",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10145-PERALES DEL PUERTO/A.ES.SDGC.CP.10145.zip",
+    "bytes": 1397029,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10073",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10073-ELJAS/A.ES.SDGC.CP.10073.zip",
+    "bytes": 1563928,
+    "cache": true
+  },
+  {
+    "tag": "miteco:concessions",
+    "url": "https://geoportal.minetur.gob.es/cgi-bin/mapservcm",
+    "bytes": 11794,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_root",
+    "url": "http://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml",
+    "bytes": 685513,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_37",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/37/ES.SDGC.CP.atom_37.xml",
+    "bytes": 637204,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:37260",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/37/37260-PUEBLA DE AZABA/A.ES.SDGC.CP.37260.zip",
+    "bytes": 544956,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:37360",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/37/37360-VILLAR DE CIERVO/A.ES.SDGC.CP.37360.zip",
+    "bytes": 1041400,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:37091",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/37/37091-CASILLAS DE FLORES/A.ES.SDGC.CP.37091.zip",
+    "bytes": 615111,
+    "cache": true
+  },
+  {
+    "tag": "idecyl:concessions",
+    "url": "https://idecyl.jcyl.es/geoserver/mineria/wfs",
+    "bytes": 52509,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_root",
+    "url": "http://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml",
+    "bytes": 685513,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_10",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/ES.SDGC.CP.atom_10.xml",
+    "bytes": 392399,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10187",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10187-TORNAVACAS/A.ES.SDGC.CP.10187.zip",
+    "bytes": 1226249,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10036",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10036-CABEZUELA DEL VALLE/A.ES.SDGC.CP.10036.zip",
+    "bytes": 1549664,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10110",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10110-JERTE/A.ES.SDGC.CP.10110.zip",
+    "bytes": 1270017,
+    "cache": true
+  },
+  {
+    "tag": "miteco:concessions",
+    "url": "https://geoportal.minetur.gob.es/cgi-bin/mapservcm",
+    "bytes": 3224,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_root",
+    "url": "http://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml",
+    "bytes": 685513,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_28",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/28/ES.SDGC.CP.atom_28.xml",
+    "bytes": 316083,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:28045",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/28/28045-COLMENAR VIEJO/A.ES.SDGC.CP.28045.zip",
+    "bytes": 5828360,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:28072",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/28/28072-HOYO DE MANZANARES/A.ES.SDGC.CP.28072.zip",
+    "bytes": 1292436,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:28077",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/28/28077-LOZOYUELA NAVAS SIETEIGLESIAS/A.ES.SDGC.CP.28077.zip",
+    "bytes": 2853399,
+    "cache": true
+  },
+  {
+    "tag": "miteco:concessions",
+    "url": "https://geoportal.minetur.gob.es/cgi-bin/mapservcm",
+    "bytes": 98527,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_root",
+    "url": "http://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml",
+    "bytes": 685513,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_10",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/ES.SDGC.CP.atom_10.xml",
+    "bytes": 392399,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10118",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10118-MALPARTIDA DE CACERES/A.ES.SDGC.CP.10118.zip",
+    "bytes": 919874,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10900",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10900-CACERES/A.ES.SDGC.CP.10900.zip",
+    "bytes": 10565447,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:10022",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/10/10022-ARROYO DE LA LUZ/A.ES.SDGC.CP.10022.zip",
+    "bytes": 3112732,
+    "cache": true
+  },
+  {
+    "tag": "miteco:concessions",
+    "url": "https://geoportal.minetur.gob.es/cgi-bin/mapservcm",
+    "bytes": 109785,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_root",
+    "url": "http://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml",
+    "bytes": 685513,
+    "cache": true
+  },
+  {
+    "tag": "catastro:atom_14",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/14/ES.SDGC.CP.atom_14.xml",
+    "bytes": 136305,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:14016",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/14/14016-CARDE\u00d1A/A.ES.SDGC.CP.14016.zip",
+    "bytes": 5613664,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:14043",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/14/14043-MONTORO/A.ES.SDGC.CP.14043.zip",
+    "bytes": 4378746,
+    "cache": true
+  },
+  {
+    "tag": "catastro:cp:14001",
+    "url": "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/14/14001-ADAMUZ/A.ES.SDGC.CP.14001.zip",
+    "bytes": 2112392,
+    "cache": true
+  },
+  {
+    "tag": "miteco:concessions",
+    "url": "https://geoportal.minetur.gob.es/cgi-bin/mapservcm",
+    "bytes": 87693,
+    "cache": true
+  },
+  {
+    "tag": "eurostat:lprc",
+    "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/apri_lprc",
+    "bytes": 67962,
+    "cache": true
+  }
+]
