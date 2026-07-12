@@ -771,13 +771,54 @@ def cadastre_spain(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataFra
     return out.to_crs(config.CRS)
 
 
-# country name (normalized) -> bbox parcel provider. Portugal's DGT cadastre is
-# sparse (only ~127/308 municipios), so it's omitted — its hotspots stay
-# raster-only, which the drill handles gracefully. Germany = Saxony only (ALKIS
-# is per-Bundesland; Saxony covers the Erzgebirge belt). Spain via the national
-# Catastro CP WFS (bbox path, distinct from the spain region's municipio ATOM).
+def cadastre_portugal(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataFrame:
+    """Cadastral parcels for a lon/lat bbox from Portugal's SNIC/DGT INSPIRE CP
+    WFS (national, CC BY 4.0). Coverage is geographically lopsided — dense in
+    the south (Alentejo/Iberian Pyrite Belt, where `iberia`'s hotspots are) but
+    sparse-to-empty in the north (Porto, the Covas do Barroso lithium mine, the
+    Panasqueira Sn-W belt), so this is wired only into the VMS `iberia` region,
+    not `europe`'s Portugal hotspots. Two gotchas found by live-testing (not
+    documented anywhere): (1) omitting `srsName=EPSG:4326` on GetFeature makes
+    the geometry silently come back in an unlabelled Portuguese projected CRS
+    with no error; (2) the bbox param is lon,lat order with a plain `EPSG:4326`
+    suffix — NOT lat,lon like Spain/Czechia's WFS 2.0 endpoints. INSPIRE CP has
+    no cadastral value or municipality name (only a numeric administrative-unit
+    code, would need a separate CAOP lookup — same gap as Spain)."""
+    minx, miny, maxx, maxy = bbox_4326
+    params = {
+        "service": "WFS", "version": "2.0.0", "request": "GetFeature",
+        "typeNames": "inspire:cadastralparcel", "srsName": "EPSG:4326",
+        "bbox": f"{minx},{miny},{maxx},{maxy},EPSG:4326", "count": "10000",
+    }
+    try:
+        gdf = gpd.read_file(io.BytesIO(net.http_get(
+            "https://snicws.dgterritorio.gov.pt/geoserver/inspire/wfs",
+            params=params, timeout=180, tag="cadastre:portugal")))
+    except Exception:
+        return _empty_parcels()
+    if gdf.empty or "geometry" not in gdf:
+        return _empty_parcels()
+    out = gpd.GeoDataFrame(
+        {
+            "parcel_id": gdf.get("nationalcadastralreference", gdf.get("gml_id")).astype(str),
+            "municipio": "",   # INSPIRE CP carries no municipality name
+            "area_ha": (pd.to_numeric(gdf.get("areavalue"), errors="coerce") / 10_000.0).round(2),
+            "cadastral_eur_ha": np.nan, "listed": False, "asking_eur_ha": np.nan, "listing_url": None,
+        },
+        geometry=gdf.geometry, crs="EPSG:4326",
+    )
+    out = out[out.geometry.notna() & (out["area_ha"].fillna(0) >= min_area_ha)]
+    return out.to_crs(config.CRS)
+
+
+# country name (normalized) -> bbox parcel provider. Germany = Saxony only
+# (ALKIS is per-Bundesland; Saxony covers the Erzgebirge belt). Spain via the
+# national Catastro CP WFS (bbox path, distinct from the spain region's
+# municipio ATOM). Portugal via SNIC/DGT (see cadastre_portugal for coverage
+# caveats — south only, which is exactly where iberia's hotspots are).
 _COUNTRY_CADASTRE = {"FRANCE": cadastre_france, "CZECHIA": cadastre_czechia,
-                     "GERMANY": cadastre_saxony, "SPAIN": cadastre_spain}
+                     "GERMANY": cadastre_saxony, "SPAIN": cadastre_spain,
+                     "PORTUGAL": cadastre_portugal}
 
 
 def parcels_for_country(country: str, bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataFrame:
