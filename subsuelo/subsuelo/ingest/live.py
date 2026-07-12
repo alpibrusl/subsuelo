@@ -903,6 +903,44 @@ def cadastre_germany(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataF
     return gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=frames[0].crs)
 
 
+def cadastre_netherlands(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataFrame:
+    """Cadastral parcels for a lon/lat bbox from Dutch Kadaster's PDOK WFS
+    (`kadastralekaart:Perceel`), CC0-licensed, live-verified reachable and
+    correctly returning real parcels (e.g. Amsterdam). Native CRS EPSG:28992
+    (Amersfoort/RD New) — no EPSG:4326 alternate listed, so reproject like
+    Saxony/Thüringen. Unlike most other cadastres integrated here, this one
+    DOES carry a usable municipality name (`kadastraleGemeenteWaarde`)."""
+    from pyproj import Transformer
+    t = Transformer.from_crs("EPSG:4326", "EPSG:28992", always_xy=True)
+    minx, miny, maxx, maxy = bbox_4326
+    xs, ys = zip(*(t.transform(x, y) for x in (minx, maxx) for y in (miny, maxy)))
+    params = {
+        "service": "WFS", "version": "2.0.0", "request": "GetFeature",
+        "typeNames": "kadastralekaart:Perceel", "count": "20000",
+        "srsName": "urn:ogc:def:crs:EPSG::28992",
+        "bbox": f"{min(xs)},{min(ys)},{max(xs)},{max(ys)},urn:ogc:def:crs:EPSG::28992",
+    }
+    try:
+        gdf = gpd.read_file(io.BytesIO(net.http_get(
+            "https://service.pdok.nl/kadaster/kadastralekaart/wfs/v5_0",
+            params=params, timeout=180, tag="cadastre:netherlands")))
+    except Exception:
+        return _empty_parcels()
+    if gdf.empty or "geometry" not in gdf:
+        return _empty_parcels()
+    out = gpd.GeoDataFrame(
+        {
+            "parcel_id": gdf.get("identificatieLokaalID", gdf.get("gml_id")).astype(str),
+            "municipio": gdf.get("kadastraleGemeenteWaarde", pd.Series([""] * len(gdf))).astype(str).str.strip(),
+            "area_ha": (pd.to_numeric(gdf.get("kadastraleGrootteWaarde"), errors="coerce") / 10_000.0).round(2),
+            "cadastral_eur_ha": np.nan, "listed": False, "asking_eur_ha": np.nan, "listing_url": None,
+        },
+        geometry=gdf.geometry, crs="EPSG:28992",
+    )
+    out = out[out.geometry.notna() & (out["area_ha"].fillna(0) >= min_area_ha)]
+    return out.to_crs(config.CRS)
+
+
 # country name (normalized) -> bbox parcel provider. Germany dispatches across
 # its integrated Länder (see cadastre_germany — Bavaria/Baden-Württemberg's
 # ALKIS WFS require a paid framework agreement, confirmed by a live 401, so
@@ -911,7 +949,13 @@ def cadastre_germany(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataF
 # cadastre_portugal for coverage caveats — south only, where iberia's hotspots are).
 _COUNTRY_CADASTRE = {"FRANCE": cadastre_france, "CZECHIA": cadastre_czechia,
                      "GERMANY": cadastre_germany, "SPAIN": cadastre_spain,
-                     "PORTUGAL": cadastre_portugal}
+                     "PORTUGAL": cadastre_portugal, "NETHERLANDS": cadastre_netherlands}
+# Italy's national cadastre WFS (wfs.cartografia.agenziaentrate.gov.it) is
+# reachable (GetCapabilities responds, and a bbox-less GetFeature returns one
+# feature) but every bbox-filtered query tested — six parameter combinations,
+# including a WFS 1.1.0 fes:Filter fallback — returned 0 features, even around
+# a coordinate confirmed to have real data. Server-side bug or misconfiguration
+# on their end, not a client-side gotcha; not integrated until that changes.
 
 
 def parcels_for_country(country: str, bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataFrame:
