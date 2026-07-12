@@ -23,6 +23,9 @@ export default function App() {
   const [parcelFocus, setParcelFocus] = useState<{ id: string } | null>(null);
   const [selectedParcel, setSelectedParcel] = useState<ParcelProps | null>(null);
   const [mode, setMode] = useState<"search" | "explore">("search");
+  // mobile only (CSS-gated — harmless no-op at desktop widths): which of the
+  // overlapping sidebar/map panels is currently shown
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [pool, setPool] = useState<IndexParcel[]>([]);
   const [poolLoading, setPoolLoading] = useState<boolean>(true);
   const pendingNav = useRef<{ region: string; rank: number; parcelId: string;
@@ -87,6 +90,7 @@ export default function App() {
 
   const selectHotspot = useCallback((rank: number) => {
     setActiveHotspot(rank);
+    setMobileView("map");   // clicking a hotspot should show its result on the map
     const h = (data?.meta?.hotspots || []).find((x) => x.rank === rank);
     if (!h || !h.n_parcels) { setDrill({ rank, parcels: null, concessions: null }); return; }
     setDrill({ rank, loading: true });
@@ -99,6 +103,7 @@ export default function App() {
   const selectParcel = useCallback((p: ParcelProps) => {
     setSelectedParcel(p);
     setParcelFocus({ id: p.parcel_id });
+    setMobileView("map");   // clicking a parcel should show it on the map
   }, []);
 
   // clear the selected parcel whenever the region or drilled hotspot changes
@@ -146,7 +151,7 @@ export default function App() {
       {introOpen && <Intro onClose={closeIntro} />}
       {aboutOpen && <About onClose={() => setAboutOpen(false)} />}
       <NavBar onAbout={() => setAboutOpen(true)} onGuide={() => setIntroOpen(true)} />
-      <div id="app">
+      <div id="app" className={mobileView === "map" ? "show-map" : ""}>
         <Sidebar
           regions={regions} region={region} setRegion={setRegion}
           data={data} target={target} setTarget={setTarget}
@@ -164,6 +169,9 @@ export default function App() {
           selectHotspot={selectHotspot} selectParcel={selectParcel}
         />
       </div>
+      <button className="mobile-toggle" onClick={() => setMobileView((v) => (v === "map" ? "list" : "map"))}>
+        {mobileView === "map" ? "Show list" : "Show map"}
+      </button>
     </>
   );
 }

@@ -16,6 +16,35 @@ html, body, #root { margin: 0; height: 100%; font-family: -apple-system, BlinkMa
 .nb-links button:hover, .nb-links .nb-gh:hover { color: var(--ink); border-color: var(--line); }
 #app { flex: 1; min-height: 0; display: grid; grid-template-columns: 380px 1fr; }
 @media (max-width: 640px) { .nb-tag { display: none; } }
+@media (max-width: 480px) {
+  #navbar { padding: 0 12px; }
+  .nb-name { font-size: 14px; }
+  .nb-links { gap: 2px; }
+  .nb-links button, .nb-links .nb-gh { padding: 6px 8px; font-size: 12px; }
+  .nb-arrow { display: none; }
+}
+
+/* --- mobile: sidebar and map both fill #app and overlap; a floating toggle
+   swaps which one is visible (visibility, not size/display) so Leaflet's
+   container never actually resizes and needs no invalidateSize() dance --- */
+.mobile-toggle { display: none; }
+@media (max-width: 760px) {
+  #app { display: block; position: relative; }
+  #sidebar, #map { position: absolute; inset: 0; width: auto; }
+  #map { visibility: hidden; }
+  #app.show-map #sidebar { visibility: hidden; }
+  #app.show-map #map { visibility: visible; }
+  /* bottom-left: clear of the zoom control (top-left), the legend (bottom-
+     right), and the sidebar header (a bottom-center or top-right pill both
+     collided with something, since this button is fixed over two different
+     scrolling views) */
+  .mobile-toggle {
+    display: flex; position: fixed; left: 12px; bottom: 18px;
+    z-index: 600; align-items: center; gap: 6px; background: var(--accent); color: #0f1419;
+    border: none; border-radius: 999px; padding: 11px 18px; font-size: 13.5px; font-weight: 700;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4); cursor: pointer;
+  }
+}
 
 /* --- sidebar shell: a pinned header+tabs zone, everything else scrolls --- */
 #sidebar { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }

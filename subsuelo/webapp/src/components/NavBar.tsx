@@ -20,7 +20,7 @@ export default function NavBar({ onAbout, onGuide }: { onAbout: () => void; onGu
         <button onClick={onGuide}>Guide</button>
         <button onClick={onAbout}>About</button>
         <button onClick={share}>{copied ? "✓ copied" : "Share"}</button>
-        <a href={REPO} target="_blank" rel="noopener noreferrer" className="nb-gh">GitHub ↗</a>
+        <a href={REPO} target="_blank" rel="noopener noreferrer" className="nb-gh">GitHub <span className="nb-arrow">↗</span></a>
       </div>
     </nav>
   );
