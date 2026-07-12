@@ -811,13 +811,106 @@ def cadastre_portugal(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoData
     return out.to_crs(config.CRS)
 
 
-# country name (normalized) -> bbox parcel provider. Germany = Saxony only
-# (ALKIS is per-Bundesland; Saxony covers the Erzgebirge belt). Spain via the
-# national Catastro CP WFS (bbox path, distinct from the spain region's
-# municipio ATOM). Portugal via SNIC/DGT (see cadastre_portugal for coverage
-# caveats — south only, which is exactly where iberia's hotspots are).
+def cadastre_nrw(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataFrame:
+    """Cadastral parcels for a lon/lat bbox from North Rhine-Westphalia's WFS
+    (`https://www.wfs.nrw.de/geobasis/wfs_nw_inspire-flurstuecke_alkis`) — the
+    real INSPIRE-CP schema (`cp:CadastralParcel`), unlike Saxony/Thüringen's
+    AdV-simplified `ave:Flurstueck`. WFS 2.0 + urn bbox is lat,lon order (same
+    convention as Czechia/Spain — confirmed by live-testing; Portugal's WFS is
+    the odd one out, needing lon,lat + a plain EPSG:4326 suffix instead).
+    License: Datenlizenz Deutschland–Zero (unrestricted). No municipality name
+    field (the `label` attribute is a parcel plot number, not a place name)."""
+    minx, miny, maxx, maxy = bbox_4326
+    params = {
+        "service": "WFS", "version": "2.0.0", "request": "GetFeature",
+        "typeNames": "cp:CadastralParcel", "srsName": "urn:ogc:def:crs:EPSG::4326",
+        "count": "20000",
+        "bbox": f"{miny},{minx},{maxy},{maxx},urn:ogc:def:crs:EPSG::4326",
+    }
+    try:
+        gdf = gpd.read_file(io.BytesIO(net.http_get(
+            "https://www.wfs.nrw.de/geobasis/wfs_nw_inspire-flurstuecke_alkis",
+            params=params, timeout=180, tag="cadastre:nrw")))
+    except Exception:
+        return _empty_parcels()
+    if gdf.empty or "geometry" not in gdf:
+        return _empty_parcels()
+    out = gpd.GeoDataFrame(
+        {
+            "parcel_id": gdf.get("nationalCadastralReference", gdf.get("localId")).astype(str),
+            "municipio": "",
+            "area_ha": (pd.to_numeric(gdf.get("areaValue"), errors="coerce") / 10_000.0).round(2),
+            "cadastral_eur_ha": np.nan, "listed": False, "asking_eur_ha": np.nan, "listing_url": None,
+        },
+        geometry=gdf.geometry, crs="EPSG:4326",
+    )
+    out = out[out.geometry.notna() & (out["area_ha"].fillna(0) >= min_area_ha)]
+    return out.to_crs(config.CRS)
+
+
+def cadastre_thuringia(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataFrame:
+    """Cadastral parcels for a lon/lat bbox from Thüringen's ALKIS-WFS
+    (`https://www.geoproxy.geoportal-th.de/geoproxy/services/adv_alkis_wfs`) —
+    the same AdV-simplified schema as Saxony (`ave:Flurstueck`, same field
+    names), just a different Land and native CRS (EPSG:25832 here vs Saxony's
+    25833). License DL-DE-BY-2.0 (attribution required)."""
+    from pyproj import Transformer
+    t = Transformer.from_crs("EPSG:4326", "EPSG:25832", always_xy=True)
+    minx, miny, maxx, maxy = bbox_4326
+    xs, ys = zip(*(t.transform(x, y) for x in (minx, maxx) for y in (miny, maxy)))
+    params = {
+        "service": "WFS", "version": "2.0.0", "request": "GetFeature",
+        "typeNames": "ave:Flurstueck", "count": "20000",
+        "srsName": "urn:ogc:def:crs:EPSG::25832",
+        "bbox": f"{min(xs)},{min(ys)},{max(xs)},{max(ys)},urn:ogc:def:crs:EPSG::25832",
+    }
+    try:
+        gdf = gpd.read_file(io.BytesIO(net.http_get(
+            "https://www.geoproxy.geoportal-th.de/geoproxy/services/adv_alkis_wfs",
+            params=params, timeout=180, tag="cadastre:thuringia")))
+    except Exception:
+        return _empty_parcels()
+    if gdf.empty or "geometry" not in gdf:
+        return _empty_parcels()
+    out = gpd.GeoDataFrame(
+        {
+            "parcel_id": gdf.get("flstkennz", gdf.get("gml_id")).astype(str),
+            "municipio": gdf.get("gemeinde", pd.Series([""] * len(gdf))).astype(str).str.strip(),
+            "area_ha": (pd.to_numeric(gdf.get("flaeche"), errors="coerce") / 10_000.0).round(2),
+            "cadastral_eur_ha": np.nan, "listed": False, "asking_eur_ha": np.nan, "listing_url": None,
+        },
+        geometry=gdf.geometry, crs="EPSG:25832",
+    )
+    out = out[out.geometry.notna() & (out["area_ha"].fillna(0) >= min_area_ha)]
+    return out.to_crs(config.CRS)
+
+
+def cadastre_germany(bbox_4326: tuple, min_area_ha: float = 0.0) -> gpd.GeoDataFrame:
+    """Germany's cadastre is per-Bundesland (16 separate services); concatenate
+    whichever of the integrated Länder (Saxony, NRW, Thüringen) actually return
+    data for this bbox. Most bboxes only overlap one; a hotspot straddling two
+    Länder borders gets both, same border-aware idea as `parcels_for_bbox`."""
+    frames = []
+    for fn in (cadastre_saxony, cadastre_nrw, cadastre_thuringia):
+        try:
+            p = fn(bbox_4326, min_area_ha)
+            if len(p):
+                frames.append(p)
+        except Exception:
+            pass
+    if not frames:
+        return _empty_parcels()
+    return gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=frames[0].crs)
+
+
+# country name (normalized) -> bbox parcel provider. Germany dispatches across
+# its integrated Länder (see cadastre_germany — Bavaria/Baden-Württemberg's
+# ALKIS WFS require a paid framework agreement, confirmed by a live 401, so
+# they're not included). Spain via the national Catastro CP WFS (bbox path,
+# distinct from the spain region's municipio ATOM). Portugal via SNIC/DGT (see
+# cadastre_portugal for coverage caveats — south only, where iberia's hotspots are).
 _COUNTRY_CADASTRE = {"FRANCE": cadastre_france, "CZECHIA": cadastre_czechia,
-                     "GERMANY": cadastre_saxony, "SPAIN": cadastre_spain,
+                     "GERMANY": cadastre_germany, "SPAIN": cadastre_spain,
                      "PORTUGAL": cadastre_portugal}
 
 
