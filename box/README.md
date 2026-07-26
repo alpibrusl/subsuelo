@@ -149,13 +149,50 @@ URLs, so the two sides cannot drift on that detail.
 ## What is deliberately *not* here
 
 No attempt to port the geospatial pipeline. That would mean reimplementing or
-binding GDAL, PROJ and GEOS, plus a numeric array type Lex does not have —
-decades of C/C++ for no gain to this project. The interesting question is not
-"can subsuelo be written in Lex" but "which parts of subsuelo benefit from
-being typed", and the answer turned out to be: the perimeter and the
-obligations, neither of which involve a single polygon.
+binding GDAL, PROJ and GEOS — decades of C/C++ for no gain to this project.
+The interesting question is not "can subsuelo be written in Lex" but "which
+parts of subsuelo benefit from being typed", and the answer turned out to be:
+the perimeter and the obligations, neither of which involve a single polygon.
 
-If Lex later grows an ndarray and native bindings, the pure-numeric core
-(`model/wofe.py`, `model/validate.py`, `score/parcels.py` — roughly 600 lines
-with no geospatial dependency) is the next candidate. `ingest/live.py` never
-will be, and that is fine.
+### The numeric core is a closer call than it looks
+
+An earlier draft of this file said the pure-numeric core would need "a numeric
+array type Lex does not have". That was wrong. Lex 0.10.7 ships `std.math`
+with a built-in `Matrix` — a dense row-major `f64` array (`Value::F64Array`)
+with `zeros` / `ones` / `from_lists` / `from_flat` / `rows` / `cols` / `get` /
+`to_flat` / `transpose` / `matmul` / `add` / `sub` / `scale` / `sigmoid`, all
+pure. Alongside it, `std.arrow` (Apache Arrow `RecordBatch` as a first-class
+value, with `read_csv`) and `std.df` (Polars-backed filter / sort /
+`group_by_agg` / `read_parquet`) cover the tabular half.
+
+That is enough for Weights-of-Evidence *today*, in both directions:
+
+- **Applying** weights. `posterior = sigmoid(prior + Σ_k [mask_k ? w⁺_k : w⁻_k])`
+  looks like it needs an elementwise multiply, but the branch rewrites to
+  `w⁻·ones + (w⁺ − w⁻)·mask` — which is `scale` + `add` + `sigmoid`.
+- **Fitting** weights. Every term in `w⁺ = ln(n(B∩D)/n(D)) − ln(n(B∩D̄)/n(D̄))`
+  is a count of overlapping pixels, i.e. `sum(a ⊙ b)` — which is a 1×N by N×1
+  `matmul` once `to_flat` / `from_flat` reshape the grids.
+
+Both are in `box/numeric/` — `wofe.lex` (apply) and `counts.lex` (fit) — and
+were run against the real 0.10.7 binary, reproducing `wofe.py`'s numpy output
+to the last digit:
+
+```sh
+lex check box/numeric/wofe.lex box/numeric/counts.lex
+lex run --allow-effects io box/numeric/wofe.lex main    # 0.24973989440488245, …
+lex run --allow-effects io box/numeric/counts.lex main  # w+ = 1.203972804325936
+```
+
+What is genuinely missing is not the array type but the *convenience* around
+it: no elementwise multiply or divide, no comparison-to-mask, no `where`, no
+reductions over a `Matrix`, no slicing or indexed assignment, and no nodata
+handling distinct from `NaN`. Each is expressible via the matmul trick above,
+at the cost of code that reads nothing like the numpy it replaces. `Matrix` is
+also undocumented in `docs/AGENT.md`; the only worked use in the toolchain
+repo is `examples/ml_app.lex`.
+
+So the honest statement is: `model/wofe.py` and `model/validate.py` (~600
+lines, no geospatial dependency) are portable now, and what stands in the way
+is ergonomics and dense-in-memory sizing rather than a missing primitive.
+`ingest/live.py` never will be, and that is fine.
