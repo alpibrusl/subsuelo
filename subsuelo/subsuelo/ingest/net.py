@@ -31,6 +31,16 @@ import requests
 _UA = {"User-Agent": "subsuelo/0.3 (+https://example.org)"}
 _TIMEOUT = 120
 
+def _host(url: str) -> str:
+    """Host of a URL — the key box/sources.lex classifies licences by.
+
+    Recorded on every provenance entry so the attribution gate can resolve a
+    build's data terms without re-parsing URLs or guessing. See subsuelo#2.
+    """
+    rest = url.split("://", 1)[-1] if "://" in url else ""
+    return rest.split("/", 1)[0]
+
+
 # provenance for the current build — reset per region by build.py, then dumped
 PROVENANCE: list = []
 
@@ -78,14 +88,14 @@ def http_get(url: str, params=None, headers=None, timeout=None, tag: str | None 
     if use_cache and not refresh and os.path.exists(path):
         with open(path, "rb") as f:
             body = f.read()
-        PROVENANCE.append({"tag": tag, "url": url, "bytes": len(body), "cache": True})
+        PROVENANCE.append({"tag": tag, "url": url, "host": _host(url), "bytes": len(body), "cache": True})
         return body
 
     if offline:
         if os.path.exists(path):
             with open(path, "rb") as f:
                 body = f.read()
-            PROVENANCE.append({"tag": tag, "url": url, "bytes": len(body),
+            PROVENANCE.append({"tag": tag, "url": url, "host": _host(url), "bytes": len(body),
                                "cache": True, "offline": True})
             return body
         raise RuntimeError(f"offline mode and no cache for {url}")
@@ -100,7 +110,7 @@ def http_get(url: str, params=None, headers=None, timeout=None, tag: str | None 
         if use_cache and os.path.exists(path):
             with open(path, "rb") as f:
                 body = f.read()
-            PROVENANCE.append({"tag": tag, "url": url, "bytes": len(body),
+            PROVENANCE.append({"tag": tag, "url": url, "host": _host(url), "bytes": len(body),
                                "cache": True, "stale": True})
             return body
         raise
@@ -110,6 +120,6 @@ def http_get(url: str, params=None, headers=None, timeout=None, tag: str | None 
         with open(tmp, "wb") as f:
             f.write(body)
         os.replace(tmp, path)   # atomic — a killed build never leaves a half file
-    PROVENANCE.append({"tag": tag, "url": url, "bytes": len(body),
+    PROVENANCE.append({"tag": tag, "url": url, "host": _host(url), "bytes": len(body),
                        "cache": False, "fetched_at": _utc()})
     return body

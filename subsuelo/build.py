@@ -44,6 +44,7 @@ def _mode() -> str:
 def build(keys: list[str], outdir: str = "out") -> dict:
     built_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     manifest = {"built_at": built_at, "mode": _mode(), "regions": {}}
+    all_hosts: set[str] = set()
 
     for key in keys:
         print(f"\n{'='*70}\n▶ region: {key}\n{'='*70}")
@@ -56,6 +57,10 @@ def build(keys: list[str], outdir: str = "out") -> dict:
             os.makedirs(rdir, exist_ok=True)
             net.dump_provenance(os.path.join(rdir, "provenance.json"))
             fetches = list(net.PROVENANCE)
+            # Every host this region actually touched, for the attribution gate
+            # in box/. Written per region and unioned below, so a refusal names
+            # the region that introduced the offending source (subsuelo#2).
+            all_hosts.update(f.get("host", "") for f in fetches)
             summary.update({
                 "status": "ok",
                 "elapsed_s": round(time.time() - t0, 1),
@@ -79,6 +84,14 @@ def build(keys: list[str], outdir: str = "out") -> dict:
     os.makedirs(os.path.join(outdir, "web"), exist_ok=True)
     with open(os.path.join(outdir, "web", "build.json"), "w") as f:
         json.dump(manifest, f, indent=2)
+
+    # The union of hosts across every region, for box/attribution_gate.lex.
+    # The gate is the thing that decides whether this build may be published;
+    # build.py only records what was touched. Keeping the decision out of here
+    # is deliberate — it is a typed, effect-bounded check, not a print.
+    manifest["hosts_touched"] = sorted(h for h in all_hosts if h)
+    with open(os.path.join(outdir, "provenance-hosts.json"), "w") as f:
+        json.dump(manifest["hosts_touched"], f, indent=2)
 
     ok = [k for k, s in manifest["regions"].items() if s.get("status") == "ok"]
     bad = [k for k, s in manifest["regions"].items() if s.get("status") != "ok"]

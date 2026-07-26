@@ -1,0 +1,5 @@
+[
+  {"tag":"igme_geology","url":"https://mapas.igme.es/gis/services/x?SERVICE=WMS","host":"mapas.igme.es","bytes":184320,"cache":true},
+  {"tag":"idealista","url":"https://api.idealista.com/3.5/es/search?propertyType=land","host":"api.idealista.com","bytes":8192,"cache":false},
+  {"tag":"new_ingestor","url":"https://opendata.example-region.gov/parcels.gpkg","host":"opendata.example-region.gov","bytes":1024,"cache":false}
+]

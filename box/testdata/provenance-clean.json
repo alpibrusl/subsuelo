@@ -1,0 +1,8 @@
+[
+  {"tag":"igme_geology","url":"https://mapas.igme.es/gis/services/Cartografia_Geologica/MapServer/WMSServer?SERVICE=WMS","host":"mapas.igme.es","bytes":184320,"cache":true},
+  {"tag":"catastro_es","url":"https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml","host":"www.catastro.hacienda.gob.es","bytes":40960,"cache":false},
+  {"tag":"dvf_fr","url":"https://files.data.gouv.fr/geo-dvf/latest/csv/2024/departements/87.csv.gz","host":"files.data.gouv.fr","bytes":2097152,"cache":true},
+  {"tag":"geosn_sachsen","url":"https://geodienste.sachsen.de/wfs_geosn_flurstuecke/guest","host":"geodienste.sachsen.de","bytes":65536,"cache":true},
+  {"tag":"eurostat","url":"https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/apri_lprc","host":"ec.europa.eu","bytes":24576,"cache":true},
+  {"tag":"naturalearth","url":"https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson","host":"raw.githubusercontent.com","bytes":8388608,"cache":true}
+]
