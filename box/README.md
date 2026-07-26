@@ -1,0 +1,130 @@
+# box/ — the Lex boundary around the Python pipeline
+
+Subsuelo's computation stays in Python: it leans on GDAL, PROJ and GEOS
+(`gpd.read_file` ×25, `.to_crs` ×32, `rasterio.rasterize`/`reproject`), and no
+amount of enthusiasm makes those reachable from Lex today. What *is* worth
+moving is the part that has nothing to do with geometry — **what the pipeline
+is allowed to touch, and what the output owes** — because that is exactly the
+kind of property a type system can carry and a supervisor can enforce.
+
+So the split is:
+
+```
+  lex-os grant  ──supervises──▶  python build.py  ──emits──▶  out/provenance.json
+  (what it may reach)            (GDAL/PROJ/GEOS)                     │
+                                                                      ▼
+                                                        lex attribution gate
+                                                                      │
+                                                    publish  ◀───┴───▶  REFUSE
+```
+
+Neither half needs the other rewritten.
+
+---
+
+## A. `subsuelo.manifest.json` — what the pipeline may reach
+
+A lex-os manifest whose `egress` list enumerates **every host subsuelo
+legitimately fetches** — 18 of them, from IGME and EGDI through five national
+cadastres to Eurostat and Natural Earth. Outside that list the box simply
+cannot open a connection.
+
+```sh
+# run the pipeline inside a supervised box
+lex-os run --manifest box/subsuelo.manifest.json
+
+# what does the manifest resolve to?
+lex-os resolve --manifest box/subsuelo.manifest.json
+
+# verify the audit chain afterwards
+lex-os audit verify --log out/audit.json
+```
+
+The grant is `filesystem: ReadWrite` (it writes `out/`), `network: Allowlist`
+(the egress list), `exec: Sandboxed` (it runs one interpreter, not arbitrary
+binaries), with `isolation_floor: Namespace` — adequate here because the box
+never gets `exec: full`.
+
+**What this buys, concretely:**
+
+- A new ingestor pointed at an undeclared host **fails at the perimeter**
+  rather than silently adding a dependency nobody reviewed.
+- The egress list is honest documentation: it cannot drift from reality,
+  because reality is enforced against it.
+- `api.idealista.com` being in the list is a *visible* decision rather than a
+  line buried in a 1,194-line module — which is the practical half of
+  [#4](https://github.com/alpibrusl/subsuelo/issues/4).
+- A compromised or confused dependency cannot exfiltrate to anywhere else.
+
+**Budget** is set to 90 minutes wall clock and 4,000 API calls — a full
+multi-region cold build with an empty cache. Tighten it once you know the real
+number for your regions; a budget that never binds is not a budget.
+
+---
+
+## B. The attribution gate — what the output owes
+
+Three Lex modules, all pure except one `[io]` entry point:
+
+| File | What it is |
+| --- | --- |
+| `licence.lex` | Licences as a lattice, and the obligations a join inherits |
+| `sources.lex` | The licence classification for all 18 hosts — the single place terms are declared |
+| `attribution_gate.lex` | Reads `out/provenance.json`, decides, refuses or reports |
+
+```sh
+lex check --strict box/            # the examples {} blocks run as tests
+lex run --allow-effects io --allow-fs-read out/provenance.json \
+    box/attribution_gate.lex main
+```
+
+The gate answers the question the Python side cannot answer about itself:
+*given everything this build actually touched, may we publish it, and what
+notices does the output owe?*
+
+**Why this is worth writing in Lex specifically:**
+
+1. **The authority is in the signature.** `main` declares `[io]` and nothing
+   else — it cannot fetch, exec, or reach the network. A reviewer knows that
+   without reading the body. That is the manifesto's claim applied to a
+   compliance check, where "I read it and it looked fine" is exactly the kind
+   of assurance you don't want.
+2. **It refuses rather than downgrades.** An undeclared host, or one
+   classified `Restricted`, fails the build. There is no override flag,
+   because obligations are not optional.
+3. **Unknown is not permissive.** `parse_licence` maps anything unrecognised to
+   `Unknown`, and `Unknown` blocks publication. Adding a source without
+   classifying its terms therefore *fails* rather than slipping through — the
+   failure mode points the right way.
+
+### What it computes
+
+- **Attribution notices** — the deduplicated union of every notice the touched
+  sources require (`required_notices`).
+- **Share-alike** — true if any input is ODbL, since that obligation
+  propagates into a derived database.
+- **Blocking sources** — anything `Restricted` or `Unknown`, named in the
+  refusal so the fix is obvious.
+
+### Keeping the two halves honest
+
+`ingest/net.py` now records `host` on every provenance entry, using the same
+extraction rule as `host_of` in `attribution_gate.lex`; both were checked
+against the real URL shapes. The gate keys off `host` rather than re-parsing
+URLs, so the two sides cannot drift on that detail.
+
+---
+
+## What is deliberately *not* here
+
+No attempt to port the geospatial pipeline. That would mean reimplementing or
+binding GDAL, PROJ and GEOS, plus a numeric array type Lex does not have —
+decades of C/C++ for no gain to this project. The interesting question is not
+"can subsuelo be written in Lex" but "which parts of subsuelo benefit from
+being typed", and the answer turned out to be: the perimeter and the
+obligations, neither of which involve a single polygon.
+
+If Lex later grows an ndarray and native bindings, the pure-numeric core
+(`model/wofe.py`, `model/validate.py`, `score/parcels.py` — roughly 600 lines
+with no geospatial dependency) is the next candidate. `ingest/live.py` never
+will be, and that is fine.

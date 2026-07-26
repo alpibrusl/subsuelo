@@ -1,0 +1,41 @@
+{
+  "goal": {
+    "description": "fetch every open data source for the configured regions, run the prospectivity + parcel pipeline, and write the build artifacts to out/",
+    "done_signal": "BUILD_COMPLETE"
+  },
+  "grant": {
+    "filesystem": "ReadWrite",
+    "network": "Allowlist",
+    "exec": "Sandboxed"
+  },
+  "budget": {
+    "wall_clock_secs": 5400,
+    "max_commands": 40,
+    "max_money_cents": 0,
+    "max_api_calls": 4000
+  },
+  "isolation_floor": "Namespace",
+  "egress": [
+    "mapas.igme.es",
+    "maps.europe-geology.eu",
+    "geoportal.minetur.gob.es",
+    "idecyl.jcyl.es",
+    "wms.mapama.gob.es",
+
+    "ovc.catastro.meh.es",
+    "www.catastro.hacienda.gob.es",
+    "data.geopf.fr",
+    "files.data.gouv.fr",
+    "services.cuzk.gov.cz",
+    "geodienste.sachsen.de",
+    "www.geoproxy.geoportal-th.de",
+    "www.wfs.nrw.de",
+    "service.pdok.nl",
+    "snicws.dgterritorio.gov.pt",
+
+    "ec.europa.eu",
+    "gisco-services.ec.europa.eu",
+
+    "raw.githubusercontent.com"
+  ]
+}
