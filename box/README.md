@@ -196,3 +196,29 @@ So the honest statement is: `model/wofe.py` and `model/validate.py` (~600
 lines, no geospatial dependency) are portable now, and what stands in the way
 is ergonomics and dense-in-memory sizing rather than a missing primitive.
 `ingest/live.py` never will be, and that is fine.
+
+### The geospatial half: decided, not deferred
+
+For GDAL / PROJ / GEOS there were three options, and only one of them was
+close:
+
+1. **Rust in the runtime** — a new `std.geo` builtin, the way `std.arrow` and
+   `std.df` were added. Lex has **no FFI** (stated twice in
+   `docs/AGENT_GUIDELINES.md`) and builtin modules are a closed hardcoded set
+   in the compiler and runtime, so this is the *only* way a real binding could
+   exist. The catch: `gdal-sys` / `proj-sys` / `geos-sys` are C bindings
+   needing system libraries, which would cost `lex` its single-binary release.
+2. **Shell out under `[proc]`** — works today with no runtime change, but
+   `[proc]` is the widest grant in the effect system, so the function doing it
+   forfeits exactly the property that makes the attribution gate worth having.
+3. **Keep it in Python.**
+
+**We went with 3.** The geospatial half is where GDAL earns its keep and
+nothing about the type system helps there, so porting it buys no safety and
+costs a rewrite. Option 1 is worth revisiting if the goal ever becomes *Lex
+having geo* rather than *subsuelo being in Lex* — and if so the sequencing is
+`std.df` first, then a narrow `std.geo` covering reproject, rasterize and
+point-in-polygon, not a wholesale GDAL wrap.
+
+This is the decision, not a placeholder: `box/` is the finished shape of the
+boundary.
