@@ -73,10 +73,41 @@ Three Lex modules, all pure except one `[io]` entry point:
 | `attribution_gate.lex` | Reads `out/provenance.json`, decides, refuses or reports |
 
 ```sh
-lex check --strict box/            # the examples {} blocks run as tests
-lex run --allow-effects io --allow-fs-read out/provenance.json \
-    box/attribution_gate.lex main
+lex check box/licence.lex box/sources.lex box/attribution_gate.lex
+lex fmt --check box/*.lex
+lex run --allow-effects io box/attribution_gate.lex main
 ```
+
+All three modules type-check against **lex 0.10.7**, and the `examples {}`
+blocks run as tests at check time — verified by breaking one deliberately and
+watching `lex check` report `example_mismatch`. `lex check` also confirms the
+gate's effect row is exactly `io`, which is the claim the next paragraph makes.
+
+Against the fixtures in `testdata/`:
+
+```
+$ lex run --allow-effects io box/attribution_gate.lex main   # clean build
+provenance: 6 fetches
+share-alike: no
+attribution notices required on the published artifact:
+  · © Instituto Geológico y Minero de España (IGME-CSIC)
+  · Dirección General del Catastro (España)
+  · DVF — data.gouv.fr, Licence Ouverte / Etalab 2.0
+  · © GeoSN, dl-de/by-2-0
+  · © European Union, Eurostat
+
+$ ...                                                        # restricted build
+provenance: 3 fetches
+REFUSED — these sources may not be redistributed:
+  ✗ api.idealista.com  [idealista (commercial API — not redistributable)]
+  ✗ opendata.example-region.gov  [UNDECLARED SOURCE]
+
+Declare the source in box/sources.lex, or exclude its values from
+the published artifacts. There is no override.
+```
+
+The second case shows both refusal modes working: a source classified
+`Restricted`, and an ingestor pointed at a host nobody declared.
 
 The gate answers the question the Python side cannot answer about itself:
 *given everything this build actually touched, may we publish it, and what

@@ -18,23 +18,15 @@
 # judgement.
 
 import "std.list" as list
-import "std.str"  as str
+
+import "std.str" as str
 
 # The licences actually present across subsuelo's sources, plus the two
 # outcomes that must never be silently treated as permissive.
 #   Unknown  — a source we have not classified yet. Refuse, don't guess.
 #   Restricted — a commercial or non-redistributable source (e.g. idealista).
-type Licence =
-    CC0
-  | DlDeZero
-  | CCBy
-  | DlDeBy20
-  | EtalabOpen
-  | OdbL
-  | Restricted
-  | Unknown
+type Licence = CC0 | DlDeZero | CCBy | DlDeBy20 | EtalabOpen | OdbL | Restricted | Unknown
 
-# What a licence demands of anything derived from it.
 type Obligation = AttributionRequired | ShareAlike | NoRedistribution
 
 type Source = { tag :: Str, host :: Str, licence :: Licence, attribution :: Str }
@@ -42,7 +34,6 @@ type Source = { tag :: Str, host :: Str, licence :: Licence, attribution :: Str 
 # ---------------------------------------------------------------------------
 # licence -> obligations
 # ---------------------------------------------------------------------------
-
 # Public-domain dedications carry nothing; attribution licences carry a notice;
 # ODbL additionally makes a derived database share-alike; Restricted and
 # Unknown block publication outright (see `blocks_publication`).
@@ -58,14 +49,14 @@ fn obligations(l :: Licence) -> List[Obligation]
   }
 {
   match l {
-    CC0         => [],
-    DlDeZero    => [],
-    CCBy        => [AttributionRequired],
-    DlDeBy20    => [AttributionRequired],
-    EtalabOpen  => [AttributionRequired],
-    OdbL        => [AttributionRequired, ShareAlike],
-    Restricted  => [NoRedistribution],
-    Unknown     => [NoRedistribution],
+    CC0 => [],
+    DlDeZero => [],
+    CCBy => [AttributionRequired],
+    DlDeBy20 => [AttributionRequired],
+    EtalabOpen => [AttributionRequired],
+    OdbL => [AttributionRequired, ShareAlike],
+    Restricted => [NoRedistribution],
+    Unknown => [NoRedistribution],
   }
 }
 
@@ -83,8 +74,8 @@ fn blocks_publication(l :: Licence) -> Bool
 {
   match l {
     Restricted => true,
-    Unknown    => true,
-    _          => false,
+    Unknown => true,
+    _ => false,
   }
 }
 
@@ -98,7 +89,7 @@ fn is_share_alike(l :: Licence) -> Bool
 {
   match l {
     OdbL => true,
-    _    => false,
+    _ => false,
   }
 }
 
@@ -112,18 +103,17 @@ fn needs_attribution(l :: Licence) -> Bool
   }
 {
   match l {
-    CCBy       => true,
-    DlDeBy20   => true,
+    CCBy => true,
+    DlDeBy20 => true,
     EtalabOpen => true,
-    OdbL       => true,
-    _          => false,
+    OdbL => true,
+    _ => false,
   }
 }
 
 # ---------------------------------------------------------------------------
 # parsing — the string a fetch records -> the lattice
 # ---------------------------------------------------------------------------
-
 # Unrecognised spellings map to Unknown, which blocks publication. That is the
 # point: adding a source without classifying its licence fails the gate rather
 # than slipping through.
@@ -143,19 +133,19 @@ fn parse_licence(s :: Str) -> Licence
 {
   let k := str.to_lower(str.trim(s))
   match str.contains(k, "zero") {
-    true  => DlDeZero,
+    true => DlDeZero,
     false => match str.starts_with(k, "cc0") {
-      true  => CC0,
+      true => CC0,
       false => match str.contains(k, "odbl") {
-        true  => OdbL,
+        true => OdbL,
         false => match str.contains(k, "dl-de/by") {
-          true  => DlDeBy20,
+          true => DlDeBy20,
           false => match str.starts_with(k, "cc-by") {
-            true  => CCBy,
+            true => CCBy,
             false => match str.contains(k, "etalab") {
-              true  => EtalabOpen,
+              true => EtalabOpen,
               false => match str.contains(k, "proprietary") {
-                true  => Restricted,
+                true => Restricted,
                 false => Unknown,
               },
             },
@@ -169,20 +159,21 @@ fn parse_licence(s :: Str) -> Licence
 # ---------------------------------------------------------------------------
 # the union over a join
 # ---------------------------------------------------------------------------
-
 # Every attribution notice a set of sources requires, deduplicated. This is
 # what has to appear on the published artifact.
 fn required_notices(sources :: List[Source]) -> List[Str] {
   let needing := list.filter(sources, fn (s :: Source) -> Bool {
     needs_attribution(s.licence)
   })
-  let notices := list.map(needing, fn (s :: Source) -> Str { s.attribution })
+  let notices := list.map(needing, fn (s :: Source) -> Str {
+    s.attribution
+  })
   list.fold(notices, [], fn (acc :: List[Str], n :: Str) -> List[Str] {
     let seen := list.fold(acc, false, fn (f :: Bool, x :: Str) -> Bool {
-      f or (x == n)
+      f or x == n
     })
     match seen {
-      true  => acc,
+      true => acc,
       false => list.concat(acc, [n]),
     }
   })
@@ -207,3 +198,4 @@ fn blocking_sources(sources :: List[Source]) -> List[Source] {
 fn may_publish(sources :: List[Source]) -> Bool {
   list.len(blocking_sources(sources)) == 0
 }
+
