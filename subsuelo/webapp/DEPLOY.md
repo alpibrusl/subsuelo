@@ -69,6 +69,45 @@ scheduled-job feature (weekly is plenty — the upstream registries change slowl
 Raw downloads are cached under `out/cache`, so a flaky endpoint falls back to its
 last good copy instead of breaking the site.
 
+## What non-JS clients see (previews, crawlers, JS-off)
+
+The app is client-rendered: the server returns a shell and React builds
+everything else. Link-preview scrapers (Slack, X, LinkedIn, iMessage) and many
+crawlers never run that JavaScript, so everything they need is hardcoded in
+`index.html`:
+
+- **Meta tags** — `<title>`, description, canonical, OpenGraph + Twitter card,
+  and a JSON-LD `WebApplication` block. These carry **absolute** URLs (scrapers
+  don't resolve relative ones), hardcoded to the GitHub Pages origin. Deploying
+  elsewhere? `SUBSUELO_SITE_URL=https://your.host ./deploy/build-static.sh`
+  rewrites them in `dist/` (index.html, robots.txt, sitemap.xml). Everything
+  else in the bundle is relative and needs no change.
+- **A boot shell** inside `#root` — the navbar, the sidebar headline and a
+  skeleton, so the first paint is the real layout with real text instead of a
+  blank screen. Its CSS is inlined in the `<head>` (no extra request), and
+  React's `createRoot()` clears it on mount. If the bundle never loads, a
+  15-second timer swaps the spinner for a "didn't load, check your connection"
+  message rather than spinning forever.
+- **A `<noscript>` fallback** — what the project is, what it models and where
+  the data comes from. A companion `<noscript><style>` hides `#root`, so with
+  JS off you get that page instead of a permanently loading shell.
+- **`robots.txt` / `sitemap.xml`** in `public/`. Caveat: on a GitHub Pages
+  *project* site they land at `/subsuelo/robots.txt`, and crawlers only honour
+  robots.txt at the origin root — it applies on hosts where the app sits at a
+  domain root. The sitemap is still usable (submit it directly in Search
+  Console); it lists one URL per `?region=`.
+
+Note what is deliberately **not** done: server-side rendering or prerendering.
+The page's content *is* an interactive Leaflet map over tens of megabytes of
+region data — there is no meaningful HTML to render ahead of time beyond the
+shell above, so SSR would add a framework and a build step for no gain. If the
+project ever grows real prose pages (methodology, per-region write-ups), those
+are worth prerendering as separate static documents.
+
+Regenerate `og-cover.png` / `favicon.png` / `apple-touch-icon.png` after a brand
+or palette change: `python deploy/make_brand_assets.py` (needs Pillow).
+`favicon.svg` is hand-written.
+
 ## Notes
 
 - **Size:** the bundle is data-heavy (rasters + parcel GeoJSON). If a host caps

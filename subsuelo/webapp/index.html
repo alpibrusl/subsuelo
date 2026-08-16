@@ -3,10 +3,174 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Subsuelo — Sn·W·Li prospectivity</title>
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0f1419" />
+
+    <title>Subsuelo — where to buy land for critical raw materials in Europe</title>
+    <meta name="description" content="Subsuelo screens Europe for critical raw materials: open-data prospectivity models drilled down to real cadastral parcels, mining rights and land prices." />
+    <link rel="canonical" href="https://alpibrusl.github.io/subsuelo/" />
+
+    <!-- Link-preview scrapers (Slack, X, LinkedIn, iMessage) and many crawlers
+         never execute our JavaScript, so everything they read has to be here in
+         the raw document — these tags and the boot shell below. Absolute URLs
+         are required; deploy/build-static.sh rewrites the origin when
+         SUBSUELO_SITE_URL points somewhere other than GitHub Pages. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Subsuelo" />
+    <meta property="og:url" content="https://alpibrusl.github.io/subsuelo/" />
+    <meta property="og:title" content="Subsuelo — where to buy land for critical raw materials" />
+    <meta property="og:description" content="Weights-of-Evidence prospectivity over open European geoscience, drilled down to real cadastral parcels, mining rights and land prices. 16 commodities, two mineral systems." />
+    <meta property="og:image" content="https://alpibrusl.github.io/subsuelo/og-cover.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Subsuelo — where to buy land for critical raw materials. Sn W Li Ta Nb U Mo Be Bi Cu Zn Pb Ag." />
+    <meta property="og:locale" content="en" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Subsuelo — where to buy land for critical raw materials" />
+    <meta name="twitter:description" content="Weights-of-Evidence prospectivity over open European geoscience, drilled down to real cadastral parcels, mining rights and land prices." />
+    <meta name="twitter:image" content="https://alpibrusl.github.io/subsuelo/og-cover.png" />
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="./favicon.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Subsuelo",
+      "url": "https://alpibrusl.github.io/subsuelo/",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Any (web browser)",
+      "isAccessibleForFree": true,
+      "license": "https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12",
+      "image": "https://alpibrusl.github.io/subsuelo/og-cover.png",
+      "description": "Subsuelo screens Europe for critical-raw-material investment opportunities. A Weights-of-Evidence prospectivity model trained on open geoscience (IGME, EGDI) ranks ground for 16 commodities across two mineral systems — granite-related Sn, W, Li, Ta, Nb, U, Mo, Be, Bi and VMS base metals Cu, Zn, Pb, Ag — then drills each prospective area down to real cadastral parcels, existing mining concessions and land prices.",
+      "keywords": "mineral prospectivity, critical raw materials, weights of evidence, open geoscience, cadastral parcels, land acquisition, tin, tungsten, lithium, Iberian Pyrite Belt, Erzgebirge, Cornwall",
+      "author": { "@type": "Organization", "name": "Alpibru", "url": "https://github.com/alpibrusl" },
+      "codeRepository": "https://github.com/alpibrusl/subsuelo"
+    }
+    </script>
+
+    <!-- Critical CSS for the boot shell, inlined so first paint needs no extra
+         request. React's createRoot() clears #root on mount, which removes all
+         of this the moment the app is ready. -->
+    <style>
+      :root { color-scheme: dark; }
+      html, body, #root { margin: 0; height: 100%; background: #0f1419; color: #e6edf3;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .boot { height: 100%; display: flex; flex-direction: column; }
+      .boot-nav { flex: none; height: 52px; display: flex; align-items: center; gap: 10px;
+        padding: 0 18px; background: #1a222c; border-bottom: 1px solid #2d3b4a; font-size: 16px; font-weight: 700; }
+      .boot-mark { width: 16px; height: 16px; border-radius: 4px;
+        background: linear-gradient(135deg, #4fd1c5, #f6c454); }
+      .boot-tag { font-size: 12px; font-weight: 400; color: #8b98a5; }
+      .boot-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 380px 1fr; }
+      .boot-side { background: #1a222c; border-right: 1px solid #2d3b4a; padding: 20px; }
+      .boot-side h1 { margin: 4px 0 10px; font-size: 19px; line-height: 1.35; }
+      .boot-side p { margin: 0 0 16px; font-size: 13px; line-height: 1.6; color: #8b98a5; }
+      .boot-bar { height: 12px; border-radius: 6px; background: #222d3a; margin-bottom: 10px;
+        animation: boot-pulse 1.4s ease-in-out infinite; }
+      .boot-bar:nth-of-type(2) { width: 78%; animation-delay: .15s; }
+      .boot-bar:nth-of-type(3) { width: 54%; animation-delay: .3s; }
+      .boot-load { display: flex; align-items: center; gap: 9px; margin-top: 22px !important; font-size: 12.5px; }
+      .boot-spin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #2d3b4a;
+        border-top-color: #4fd1c5; animation: boot-spin .8s linear infinite; }
+      .boot-map { background:
+        repeating-linear-gradient(0deg, #131a21 0 1px, transparent 1px 46px),
+        repeating-linear-gradient(90deg, #131a21 0 1px, transparent 1px 46px), #0f1419; }
+      @keyframes boot-spin { to { transform: rotate(360deg); } }
+      @keyframes boot-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+      @media (prefers-reduced-motion: reduce) { .boot-spin, .boot-bar { animation: none; } }
+      @media (max-width: 760px) { .boot-body { grid-template-columns: 1fr; } .boot-map { display: none; } }
+      .boot-fail { color: #f6c454; }
+      .noscript { max-width: 720px; margin: 0 auto; padding: 40px 24px; line-height: 1.65; }
+      .noscript h1 { font-size: 26px; margin: 0 0 12px; }
+      .noscript a { color: #4fd1c5; }
+      .noscript .warn { border-left: 3px solid #f6c454; padding: 10px 14px; background: #1a222c;
+        border-radius: 0 8px 8px 0; margin: 22px 0; }
+    </style>
+    <noscript><style>/* the app stylesheet loads after this and sets #root{display:flex} */ #root { display: none !important; }</style></noscript>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Boot shell: real, readable content on the very first paint, instead of
+           a blank screen while the bundle and region data load. -->
+      <div class="boot">
+        <div class="boot-nav">
+          <span class="boot-mark" aria-hidden="true"></span>
+          <span>Subsuelo</span>
+          <span class="boot-tag">mineral prospectivity · land screening</span>
+        </div>
+        <div class="boot-body">
+          <div class="boot-side">
+            <h1>Where to buy land for critical raw materials</h1>
+            <p>Subsuelo fuses open European geoscience with property cadastres, mining-rights
+              registries and land prices — 16 commodities across two mineral systems — into a
+              single screening map: prospective ground, ranked, down to individual parcels.</p>
+            <div class="boot-bar" aria-hidden="true"></div>
+            <div class="boot-bar" aria-hidden="true"></div>
+            <div class="boot-bar" aria-hidden="true"></div>
+            <p class="boot-load" role="status">
+              <span class="boot-spin" aria-hidden="true"></span> Loading the map and region data…
+            </p>
+          </div>
+          <div class="boot-map" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <noscript>
+      <div class="noscript">
+        <h1>Subsuelo — where to buy land for critical raw materials</h1>
+        <p>Subsuelo screens Europe for critical-raw-material investment opportunities:
+          it identifies prospective ground and matches it to land you could actually acquire,
+          by fusing open geoscience, property cadastres, permitting data and land prices into
+          one interactive map.</p>
+        <div class="warn">
+          <b>This application needs JavaScript.</b> It renders an interactive Leaflet map and
+          loads tens of megabytes of region data in the browser, so there is no static version
+          to show. Enable JavaScript, or read the method and data notes in the repository.
+        </div>
+        <h2>What it does</h2>
+        <ul>
+          <li><b>Prospectivity</b> — a Weights-of-Evidence model (Agterberg / Bonham-Carter)
+            trained on known mineral occurrences shades every grid cell by how favourable the
+            ground is for each metal.</li>
+          <li><b>Two mineral systems</b> — granite-related (Sn, W, Li, Ta, Nb, U, Mo, Be, Bi,
+            plus Ba, As, Sb as indicative proxies) and VMS base metals (Cu, Zn, Pb, Ag, the
+            Iberian Pyrite Belt).</li>
+          <li><b>Prospective areas</b> — the model ranks the strongest clusters into hotspots
+            across Europe: Iberia, the Erzgebirge, the Massif Central, Cornwall, Fennoscandia.</li>
+          <li><b>Land parcels</b> — each hotspot drills down to real cadastral parcels (Spain,
+            Portugal, France, Czechia, Germany, Netherlands), flagged where a mining concession
+            already exists and priced from real transactions or regional estimates.</li>
+        </ul>
+        <h2>Data sources</h2>
+        <p>IGME 1:1M geology and BDMIN occurrences (Spain); EGDI 1:1M lithology, HIKE faults and
+          the INSPIRE mineral-occurrence inventory (Europe); Catastro, IGN Géoplateforme, ČÚZK,
+          GeoSN ALKIS, DGT/SNIC and PDOK Kadaster (parcels); MITECO Catastro Minero and IDECyL
+          (mining rights); French DVF, Eurostat <i>apri_lprc</i> and Destatis (land prices);
+          Natural Earth and Eurostat GISCO (reference geometry). All of it real, open, public
+          data — the tool computes screening indications, not exploration-grade or legal
+          conclusions.</p>
+        <p>Open source (EUPL-1.2) —
+          <a href="https://github.com/alpibrusl/subsuelo">github.com/alpibrusl/subsuelo</a>.</p>
+      </div>
+    </noscript>
+
+    <script>
+      // React's createRoot() wipes #root on mount, so this only ever fires when
+      // the bundle failed to load (offline, blocked, CDN-less network timeout) —
+      // the one case that used to leave a permanently spinning screen.
+      setTimeout(function () {
+        var el = document.querySelector('#root .boot-load');
+        if (!el) return;                       // app mounted; nothing to do
+        el.innerHTML = '<span class="boot-fail">The app didn\'t load. ' +
+          'Check your connection and reload &mdash; or read the method notes at ' +
+          '<a href="https://github.com/alpibrusl/subsuelo">github.com/alpibrusl/subsuelo</a>.</span>';
+      }, 15000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
