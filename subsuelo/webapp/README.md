@@ -76,6 +76,10 @@ hotspot. The **share** button in the header copies the current link.
 
 ## Notes
 
+- `index.html` is not just a mount point: it carries the meta/OpenGraph tags, a
+  boot shell (inline critical CSS, cleared by `createRoot()`) and a `<noscript>`
+  fallback, since preview scrapers and crawlers never run the bundle. Details
+  and the `SUBSUELO_SITE_URL` override in `DEPLOY.md`.
 - Vite serves `index.html` (200) for missing files, so `data.js#getJSON` guards
   on content-type/parse errors — a missing region asset resolves to `null`.
 - The vanilla single-file UI (`../subsuelo/web/index.html`, served by

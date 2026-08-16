@@ -1,0 +1,9 @@
+# Subsuelo — https://alpibrusl.github.io/subsuelo/
+# NOTE: on a GitHub Pages *project* site this file lives at /subsuelo/robots.txt
+# and crawlers ignore it (robots.txt is only honoured at the origin root). It is
+# shipped for deployments at a domain root (Netlify/Vercel/Cloudflare/S3), where
+# it does apply. Nothing here is disallowed either way.
+User-agent: *
+Allow: /
+
+Sitemap: https://alpibrusl.github.io/subsuelo/sitemap.xml
